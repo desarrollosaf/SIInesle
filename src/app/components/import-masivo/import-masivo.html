@@ -1,0 +1,175 @@
+<div class="container-fluid py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h4 fw-bold mb-1">Carga masiva desde CSV</h1>
+      <p class="text-muted mb-0">Importe el archivo base de iniciativas. El sistema reconoce las columnas, valida cada fila y muestra el resultado antes de guardar.</p>
+    </div>
+    <button class="btn btn-outline-secondary" type="button" (click)="descargarPlantilla()">
+      <i class="bi bi-download me-1"></i>Descargar plantilla
+    </button>
+  </div>
+
+  <!-- Paso 1: archivo -->
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white fw-bold">1. Archivo</div>
+    <div class="card-body">
+      @if (!nombreArchivo()) {
+        <div
+          class="border border-2 border-dashed rounded-3 text-center py-5 px-3"
+          [class.border-primary]="arrastrando()"
+          [class.bg-light]="arrastrando()"
+          (dragover)="$event.preventDefault(); arrastrando.set(true)"
+          (dragleave)="arrastrando.set(false)"
+          (drop)="onDrop($event)">
+          <i class="bi bi-cloud-upload display-5 text-muted"></i>
+          <p class="fw-bold mt-3 mb-1">Arrastre el archivo CSV o selecciónelo</p>
+          <p class="text-muted small mb-3">Guarde su hoja como CSV (UTF-8). Se reconocen coma, punto y coma y tabulador.</p>
+          <label class="btn btn-primary mb-0">
+            Seleccionar archivo
+            <input type="file" accept=".csv,text/csv" hidden (change)="onSeleccionarArchivo($event)">
+          </label>
+        </div>
+      } @else {
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <span class="badge bg-light text-dark border py-2 px-3">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i>{{ nombreArchivo() }} · {{ filasCrudas().length }} filas · {{ encabezados().length }} columnas
+          </span>
+          <button class="btn btn-sm btn-outline-danger" type="button" (click)="descartar()">Descartar archivo</button>
+        </div>
+      }
+
+      <div class="row g-3 mt-1">
+        <div class="col-md-4">
+          <label class="form-label small">Valores múltiples separados por</label>
+          <select class="form-select" [(ngModel)]="separador" (ngModelChange)="analizar()">
+            <option value="auto">Salto de línea, punto y coma o barra</option>
+            <option value="comma">Lo anterior y también comas</option>
+            <option value="none">No separar: un solo valor por celda</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small">Si el número ya existe</label>
+          <select class="form-select" [(ngModel)]="siExiste">
+            <option value="omitir">Omitir la fila</option>
+            <option value="actualizar">Actualizar el registro existente</option>
+          </select>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="agregarCatalogos" [(ngModel)]="agregarCatalogos">
+            <label class="form-check-label small" for="agregarCatalogos">
+              Agregar a los catálogos los valores nuevos que aparezcan en el archivo
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (nombreArchivo()) {
+    <!-- Paso 2: mapeo de columnas -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white fw-bold">2. Correspondencia de columnas</div>
+      <div class="card-body">
+        <p class="text-muted small">Se asignaron automáticamente por nombre. Corrija las que haga falta.</p>
+        <div class="row g-3">
+          @for (campo of campos; track campo.key) {
+            <div class="col-md-4">
+              <label class="form-label small">
+                {{ campo.label }}
+                @if (campo.required) { <span class="text-danger">*</span> }
+              </label>
+              <select class="form-select form-select-sm" [ngModel]="valorMapeo(campo.key)" (ngModelChange)="onCambiarMapeo(campo.key, $event)">
+                <option value="">Sin asignar</option>
+                @for (h of encabezados(); track $index) {
+                  <option [value]="$index">{{ h || ('Columna ' + ($index + 1)) }}</option>
+                }
+              </select>
+              <p class="text-muted mb-0" style="font-size:.72rem">
+                {{ ejemplo(campo.key) ? ('Ejemplo: ' + ejemplo(campo.key).slice(0, 60)) : 'Sin columna asignada' }}
+              </p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso 3: validación -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white fw-bold">3. Validación y vista previa</div>
+      <div class="card-body">
+        <div class="row g-2 mb-3">
+          <div class="col-6 col-md-3">
+            <div class="border rounded p-2 text-center"><strong class="d-block fs-5">{{ total() }}</strong><span class="small text-muted">Filas en el archivo</span></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="border rounded p-2 text-center bg-success-subtle"><strong class="d-block fs-5 text-success">{{ validas() }}</strong><span class="small text-muted">Listas para importar</span></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="border rounded p-2 text-center bg-warning-subtle"><strong class="d-block fs-5 text-warning-emphasis">{{ conAdvertencia() }}</strong><span class="small text-muted">Con advertencias</span></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="border rounded p-2 text-center bg-danger-subtle"><strong class="d-block fs-5 text-danger">{{ conError() }}</strong><span class="small text-muted">Con errores</span></div>
+          </div>
+        </div>
+
+        <div class="table-responsive mb-3">
+          <table class="table table-sm align-middle">
+            <thead class="table-light">
+              <tr><th>Fila</th><th>Número</th><th>Iniciativa</th><th>Fecha</th><th>Promovente</th><th>Resultado</th></tr>
+            </thead>
+            <tbody>
+              @for (f of primeras25(); track f.linea) {
+                <tr>
+                  <td>{{ f.linea }}</td>
+                  <td>{{ f.numero || '—' }}</td>
+                  <td class="text-truncate" style="max-width:260px">{{ f.titulo || '—' }}</td>
+                  <td>{{ f.fecha_presentacion || '—' }}</td>
+                  <td>{{ f.promotores[0] || '—' }}</td>
+                  <td>
+                    @switch (f.estado) {
+                      @case ('correcta') { <span class="badge bg-success">Correcta</span> }
+                      @case ('advertencia') { <span class="badge bg-warning text-dark">Advertencia</span> }
+                      @case ('error') { <span class="badge bg-danger">Error</span> }
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="6" class="text-center text-muted py-3">Sin filas para mostrar.</td></tr>
+              }
+            </tbody>
+          </table>
+          @if (total() > 25) { <p class="text-muted small mb-0">Mostrando las primeras 25 filas de {{ total() }}.</p> }
+        </div>
+
+        @if (conError() || conAdvertencia()) {
+          <div class="mb-3" style="max-height:220px;overflow:auto">
+            <ul class="list-unstyled small mb-0">
+              @for (f of filas(); track f.linea) {
+                @for (e of f.errores; track e) {
+                  <li class="text-danger">Fila {{ f.linea }} · {{ e }}</li>
+                }
+                @for (a of f.advertencias; track a) {
+                  <li class="text-warning-emphasis">Fila {{ f.linea }} · {{ a }}</li>
+                }
+              }
+            </ul>
+          </div>
+        }
+
+        <div class="d-flex justify-content-between flex-wrap gap-2">
+          <button class="btn btn-outline-secondary" type="button" (click)="descargarIncidencias()" [disabled]="!conError() && !conAdvertencia()">
+            <i class="bi bi-download me-1"></i>Reporte de incidencias
+          </button>
+          <button class="btn btn-primary" type="button" (click)="importar()" [disabled]="!validas() || importando()">
+            @if (importando()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>Importando...
+            } @else {
+              Importar {{ validas() }} iniciativa(s)
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

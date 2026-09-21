@@ -1,0 +1,47 @@
+<nav class="app-header navbar px-3 px-lg-4">
+  <div class="container-fluid d-flex align-items-center gap-3" style="height:100%">
+
+    <!-- Botón menú móvil -->
+    <button class="btn header-icon-btn text-white d-lg-none p-0"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#mobileSidebar"
+            aria-controls="mobileSidebar">
+      <i class="bi bi-list fs-2"></i>
+    </button>
+
+    <div class="flex-grow-1"></div>
+
+    <!-- Acciones derecha -->
+    <div class="d-flex align-items-center gap-2">
+
+      <div class="header-divider d-none d-sm-block"></div>
+
+      <!-- Avatar / menú usuario -->
+      <div class="dropdown">
+        <button class="btn header-avatar-btn d-flex align-items-center gap-2"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
+          <div class="header-avatar rounded-circle d-flex justify-content-center align-items-center">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          @if (auth.usuario(); as u) {
+            <span class="d-none d-sm-inline small text-white">{{ u.nombre_completo }}</span>
+          }
+          <i class="bi bi-chevron-down header-chevron d-none d-sm-block"></i>
+        </button>
+
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+          <li>
+            <button class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger w-100 border-0 bg-transparent"
+                    (click)="logout()">
+              <i class="bi bi-box-arrow-right"></i>
+              Cerrar sesión
+            </button>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</nav>

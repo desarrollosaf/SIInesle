@@ -1,0 +1,33 @@
+@if (auth.isLoggedIn()) {
+  <div class="d-flex vh-100 overflow-hidden">
+
+    <!-- Sidebar Desktop: full height -->
+    <div class="d-none d-lg-flex flex-column flex-shrink-0 border-end" style="width: 280px;">
+      <app-sidebar></app-sidebar>
+    </div>
+
+    <!-- Sidebar Mobile (Offcanvas) -->
+    <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="mobileSidebar">
+      <div class="offcanvas-body p-0 position-relative d-flex flex-column overflow-hidden">
+        <button type="button"
+                class="btn-close btn-close-white position-absolute top-0 end-0 z-2 m-3"
+                data-bs-dismiss="offcanvas"
+                style="opacity:.75"></button>
+        <app-sidebar></app-sidebar>
+      </div>
+    </div>
+
+    <!-- Topbar + contenido -->
+    <div class="d-flex flex-column flex-grow-1 overflow-hidden">
+      <app-header></app-header>
+      <div class="flex-grow-1 overflow-auto bg-light" id="main-scroll">
+        <div class="main-content p-2 p-md-0">
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+    </div>
+
+  </div>
+} @else {
+  <router-outlet></router-outlet>
+}

@@ -1,0 +1,80 @@
+$guinda: #96134B;
+$dorado: #BB945C;
+
+.app-header {
+  height: 64px;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  position: relative;
+  background: linear-gradient(90deg, $guinda 0%, darken($guinda, 8%) 100%);
+  box-shadow: 0 2px 12px rgba($guinda, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+// Botones icono (menú móvil)
+.header-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  transition: background-color 0.18s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
+// Divisor vertical
+.header-divider {
+  width: 1px;
+  height: 28px;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+// Botón avatar
+.header-avatar-btn {
+  background: transparent;
+  border: none;
+  padding: 4px 6px;
+  border-radius: 10px;
+  transition: background-color 0.18s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+}
+
+// Círculo del avatar
+.header-avatar {
+  width: 34px;
+  height: 34px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  color: white;
+  font-size: 1rem;
+  transition: background-color 0.18s ease;
+
+  .header-avatar-btn:hover & {
+    background-color: rgba(255, 255, 255, 0.28);
+  }
+}
+
+// Chevron del avatar
+.header-chevron {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.7rem;
+  transition: transform 0.2s ease;
+}
+
+[aria-expanded="true"] .header-chevron {
+  transform: rotate(180deg);
+}

@@ -1,0 +1,414 @@
+<div class="container-fluid py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h4 fw-bold mb-1">{{ iniciativaId() ? 'Editar iniciativa' : 'Registro de iniciativa' }}</h1>
+      <p class="text-muted mb-0">Ficha técnica, análisis integral y antecedentes comparados.</p>
+    </div>
+    <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">Cancelar</button>
+  </div>
+
+  @if (loading()) {
+    <p class="text-muted">Cargando información...</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="row g-4">
+
+    <!-- Riel de avance -->
+    <div class="col-lg-3 order-2 order-lg-1">
+      <div class="d-flex flex-column gap-3" style="position:sticky; top:1rem">
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-baseline gap-2 mb-2">
+              <strong class="h4 mb-0 text-guinda">{{ progresoPorcentaje() }}%</strong>
+              <span class="text-muted small">de los campos obligatorios</span>
+            </div>
+            <div class="progress" style="height:6px">
+              <div class="progress-bar bg-guinda" [style.width.%]="progresoPorcentaje()"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+          <div class="list-group list-group-flush">
+            <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" (click)="irASeccion('seccion-ficha')">
+              <span><span class="badge rounded-pill bg-guinda me-2">1</span>Ficha técnica</span>
+              <small class="text-muted">{{ conteoFichaTecnica() }}</small>
+            </button>
+            <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" (click)="irASeccion('seccion-analisis')">
+              <span><span class="badge rounded-pill bg-guinda me-2">2</span>Análisis integral</span>
+              <small class="text-muted">{{ conteoAnalisisIntegral() }}</small>
+            </button>
+            <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" (click)="irASeccion('seccion-comparativas')">
+              <span><span class="badge rounded-pill bg-guinda me-2">3</span>Comparativas</span>
+              <small class="text-muted">Opcional</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h2 class="h6 fw-bold mb-3">Lo capturado hasta ahora</h2>
+            <dl class="small mb-0">
+              <dt class="text-muted fw-normal">Número</dt>
+              <dd class="fw-semibold">{{ form.value.numero || 'Sin capturar' }}</dd>
+              <dt class="text-muted fw-normal">Legislatura</dt>
+              <dd class="fw-semibold">{{ nombreCatalogo(legislaturas(), form.value.legislatura_id) || 'Sin seleccionar' }}</dd>
+              <dt class="text-muted fw-normal">Promoventes</dt>
+              <dd class="fw-semibold">{{ resumenSeleccion(form.value.legislador_ids) }}</dd>
+              <dt class="text-muted fw-normal">Grupos parlamentarios</dt>
+              <dd class="fw-semibold">{{ resumenSeleccion(form.value.partido_ids) }}</dd>
+              <dt class="text-muted fw-normal">Temas</dt>
+              <dd class="fw-semibold">{{ resumenSeleccion(form.value.tema_ids) }}</dd>
+              <dt class="text-muted fw-normal mb-0">Comisiones</dt>
+              <dd class="fw-semibold mb-0">{{ resumenSeleccion(form.value.comision_ids) }}</dd>
+            </dl>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="col-lg-9 order-1 order-lg-2">
+
+    <section class="block" id="seccion-ficha">
+      <header class="block-head">
+        <h2>Identificación</h2>
+        <p>Datos oficiales con los que el expediente entra al sistema.</p>
+      </header>
+      <div class="block-body">
+        <div class="row-3">
+          <div class="field">
+            <label>Número de iniciativa <span class="required">*</span></label>
+            <input class="control" formControlName="numero" maxlength="12" placeholder="Ej. 1314" [class.is-invalid]="invalido('numero')">
+            <div class="invalid-feedback">Ingrese un número válido (solo dígitos).</div>
+          </div>
+          <div class="field">
+            <label>Fecha de presentación <span class="required">*</span></label>
+            <input type="date" class="control" formControlName="fecha_presentacion" [class.is-invalid]="invalido('fecha_presentacion')">
+            <div class="invalid-feedback">Seleccione una fecha válida que no sea futura.</div>
+          </div>
+          <div class="field">
+            <label>Legislatura <span class="required">*</span></label>
+            <ng-select [items]="legislaturas()" bindLabel="nombre" bindValue="id" formControlName="legislatura_id" placeholder="Seleccione..." [class.is-invalid]="invalido('legislatura_id')"></ng-select>
+            @if (invalido('legislatura_id')) { <div class="text-danger small mt-1">Indique la legislatura en la que se presentó la iniciativa.</div> }
+          </div>
+        </div>
+        <div class="field">
+          <label>Título de la iniciativa <span class="required">*</span><span class="hint">mínimo 20 caracteres</span></label>
+          <textarea class="control" rows="2" formControlName="titulo" maxlength="2500" placeholder="Escriba el título oficial completo" [class.is-invalid]="invalido('titulo')"></textarea>
+          <div class="invalid-feedback">El título debe contener al menos 20 caracteres.</div>
+          <div class="counter">{{ form.value.titulo?.length || 0 }}/2500</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <header class="block-head">
+        <h2>Quién la presenta</h2>
+        <p>Una iniciativa puede tener varias personas promoventes y varios grupos parlamentarios. Agregue todos los que correspondan.</p>
+      </header>
+      <div class="block-body">
+        <div class="field">
+          <label>Persona legisladora o promovente <span class="required">*</span></label>
+          <div class="picker" [class.is-invalid]="invalido('legislador_ids')">
+            <div class="inline-add">
+              <select class="control" [(ngModel)]="seleccionActual.legislador_ids" [ngModelOptions]="{standalone: true}">
+                <option [ngValue]="null">Seleccione del catálogo...</option>
+                @for (item of opcionesPendientes('legislador_ids'); track item.id) {
+                  <option [ngValue]="item.id">{{ item.nombre }}</option>
+                }
+              </select>
+              <button class="btn btn-outline-secondary" type="button" (click)="agregarSeleccion('legislador_ids')">Agregar</button>
+              <button class="btn btn-dorado" type="button" (click)="darDeAlta('legislador_ids')">＋ Dar de alta</button>
+            </div>
+            <div class="chips">
+              @for (item of chipsDe('legislador_ids'); track item.id) {
+                <span class="chip">{{ item.nombre }}<button type="button" (click)="quitarSeleccion('legislador_ids', item.id)" [attr.aria-label]="'Quitar ' + item.nombre">×</button></span>
+              }
+            </div>
+            <p class="picker-hint">Si el nombre no está en el catálogo, use “Dar de alta” para registrarlo.</p>
+          </div>
+          @if (invalido('legislador_ids')) { <div class="text-danger small mt-1">Agregue al menos una persona legisladora o promovente.</div> }
+        </div>
+        <div class="field">
+          <label>Grupo parlamentario o partido <span class="required">*</span></label>
+          <div class="picker" [class.is-invalid]="invalido('partido_ids')">
+            <div class="inline-add">
+              <select class="control" [(ngModel)]="seleccionActual.partido_ids" [ngModelOptions]="{standalone: true}">
+                <option [ngValue]="null">Seleccione del catálogo...</option>
+                @for (item of opcionesPendientes('partido_ids'); track item.id) {
+                  <option [ngValue]="item.id">{{ item.nombre }}</option>
+                }
+              </select>
+              <button class="btn btn-outline-secondary" type="button" (click)="agregarSeleccion('partido_ids')">Agregar</button>
+              <button class="btn btn-dorado" type="button" (click)="darDeAlta('partido_ids')">＋ Dar de alta</button>
+            </div>
+            <div class="chips">
+              @for (item of chipsDe('partido_ids'); track item.id) {
+                <span class="chip">{{ item.nombre }}<button type="button" (click)="quitarSeleccion('partido_ids', item.id)" [attr.aria-label]="'Quitar ' + item.nombre">×</button></span>
+              }
+            </div>
+            <p class="picker-hint">Para iniciativas conjuntas agregue cada grupo por separado.</p>
+          </div>
+          @if (invalido('partido_ids')) { <div class="text-danger small mt-1">Agregue al menos un grupo parlamentario o tipo de promovente.</div> }
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <header class="block-head">
+        <h2>Materia y trámite</h2>
+        <p>Clasificación temática, comisiones a las que se turna y situación procesal.</p>
+      </header>
+      <div class="block-body">
+        <div class="field">
+          <label>Tema <span class="required">*</span></label>
+          <div class="picker" [class.is-invalid]="invalido('tema_ids')">
+            <div class="inline-add">
+              <select class="control" [(ngModel)]="seleccionActual.tema_ids" [ngModelOptions]="{standalone: true}">
+                <option [ngValue]="null">Seleccione del catálogo...</option>
+                @for (item of opcionesPendientes('tema_ids'); track item.id) {
+                  <option [ngValue]="item.id">{{ item.nombre }}</option>
+                }
+              </select>
+              <button class="btn btn-outline-secondary" type="button" (click)="agregarSeleccion('tema_ids')">Agregar</button>
+              <button class="btn btn-dorado" type="button" (click)="darDeAlta('tema_ids')">＋ Dar de alta</button>
+            </div>
+            <div class="chips">
+              @for (item of chipsDe('tema_ids'); track item.id) {
+                <span class="chip">{{ item.nombre }}<button type="button" (click)="quitarSeleccion('tema_ids', item.id)" [attr.aria-label]="'Quitar ' + item.nombre">×</button></span>
+              }
+            </div>
+            <p class="picker-hint">Agregue un tema principal y, si aplica, los temas secundarios.</p>
+          </div>
+          @if (invalido('tema_ids')) { <div class="text-danger small mt-1">Agregue al menos un tema del catálogo.</div> }
+        </div>
+        <div class="field">
+          <label>Subtema <span class="required">*</span><span class="hint">mínimo 5 caracteres</span></label>
+          <input class="control" formControlName="subtema" placeholder="Descripción breve y específica" [class.is-invalid]="invalido('subtema')">
+          <div class="invalid-feedback">Ingrese un subtema de al menos 5 caracteres.</div>
+        </div>
+        <div class="field">
+          <label>Comisión turnada <span class="required">*</span></label>
+          <div class="picker" [class.is-invalid]="invalido('comision_ids')">
+            <div class="inline-add">
+              <select class="control" [(ngModel)]="seleccionActual.comision_ids" [ngModelOptions]="{standalone: true}">
+                <option [ngValue]="null">Seleccione del catálogo...</option>
+                @for (item of opcionesPendientes('comision_ids'); track item.id) {
+                  <option [ngValue]="item.id">{{ item.nombre }}</option>
+                }
+              </select>
+              <button class="btn btn-outline-secondary" type="button" (click)="agregarSeleccion('comision_ids')">Agregar</button>
+              <button class="btn btn-dorado" type="button" (click)="darDeAlta('comision_ids')">＋ Dar de alta</button>
+            </div>
+            <div class="chips">
+              @for (item of chipsDe('comision_ids'); track item.id) {
+                <span class="chip">{{ item.nombre }}<button type="button" (click)="quitarSeleccion('comision_ids', item.id)" [attr.aria-label]="'Quitar ' + item.nombre">×</button></span>
+              }
+            </div>
+            <p class="picker-hint">Si se turna a comisiones unidas, agregue cada una de ellas.</p>
+          </div>
+          @if (invalido('comision_ids')) { <div class="text-danger small mt-1">Agregue al menos una comisión turnada.</div> }
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Estatus <span class="required">*</span></label>
+            <ng-select [items]="estatus()" bindLabel="nombre" bindValue="id" formControlName="estatus_id" placeholder="Seleccione..." [class.is-invalid]="invalido('estatus_id')"></ng-select>
+            @if (invalido('estatus_id')) { <div class="text-danger small mt-1">Seleccione un estatus.</div> }
+          </div>
+          <div class="field">
+            <label>Enlace al documento <span class="hint">opcional</span></label>
+            <input class="control" type="url" formControlName="enlace" placeholder="https://..." [class.is-invalid]="invalido('enlace')">
+            <div class="invalid-feedback">Ingrese una dirección completa que comience con http:// o https://.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <header class="block-head">
+        <h2>Contenido para consulta</h2>
+        <p>Esta información es la que aparece en la vista pública y en los buscadores del sistema.</p>
+      </header>
+      <div class="block-body">
+        <div class="field">
+          <label>Resumen técnico <span class="required">*</span><span class="hint">mínimo 80 caracteres</span></label>
+          <textarea class="control" rows="3" formControlName="resumen" maxlength="3000" placeholder="Explique de manera sintética el contenido y alcance" [class.is-invalid]="invalido('resumen')"></textarea>
+          <div class="invalid-feedback">El resumen debe contener al menos 80 caracteres.</div>
+          <div class="counter">{{ form.value.resumen?.length || 0 }}/3000</div>
+        </div>
+        <div class="field">
+          <label>Palabras clave <span class="required">*</span><span class="hint">mínimo 3, separadas por coma</span></label>
+          <input class="control" formControlName="palabras_clave" placeholder="derechos, reforma, municipios" [class.is-invalid]="invalido('palabras_clave')">
+          <div class="invalid-feedback">Ingrese al menos tres palabras clave diferentes.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="seccion-analisis">
+      <header class="block-head">
+        <h2>Diagnóstico y propósito</h2>
+        <p>Qué problema atiende la iniciativa y qué busca lograr.</p>
+      </header>
+      <div class="block-body">
+        <div class="field">
+          <label>Problema público que atiende <span class="required">*</span><span class="hint">mínimo 60 caracteres</span></label>
+          <textarea class="control" rows="2" formControlName="problema" maxlength="4000" [class.is-invalid]="invalido('problema')"></textarea>
+          <div class="invalid-feedback">Explique el problema en al menos 60 caracteres.</div>
+          <div class="counter">{{ form.value.problema?.length || 0 }}/4000</div>
+        </div>
+        <div class="field">
+          <label>Objetivo de la iniciativa <span class="required">*</span><span class="hint">mínimo 40 caracteres</span></label>
+          <textarea class="control" rows="2" formControlName="objetivo" maxlength="3000" [class.is-invalid]="invalido('objetivo')"></textarea>
+          <div class="invalid-feedback">Explique el objetivo en al menos 40 caracteres.</div>
+          <div class="counter">{{ form.value.objetivo?.length || 0 }}/3000</div>
+        </div>
+        <div class="field">
+          <label>Resumen general del análisis <span class="required">*</span><span class="hint">mínimo 80 caracteres</span></label>
+          <textarea class="control" rows="3" formControlName="resumen_general" maxlength="5000" [class.is-invalid]="invalido('resumen_general')"></textarea>
+          <div class="invalid-feedback">El análisis debe contener al menos 80 caracteres.</div>
+          <div class="counter">{{ form.value.resumen_general?.length || 0 }}/5000</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <header class="block-head">
+        <h2>Resultados esperados y riesgos</h2>
+        <p>Efectos previsibles de aprobarse la iniciativa.</p>
+      </header>
+      <div class="block-body row-2">
+        <div class="field">
+          <label>Beneficios esperados <span class="required">*</span><span class="hint">mínimo 30 caracteres</span></label>
+          <textarea class="control" rows="3" formControlName="beneficios" maxlength="4000" [class.is-invalid]="invalido('beneficios')"></textarea>
+          <div class="invalid-feedback">Describa los beneficios esperados.</div>
+        </div>
+        <div class="field">
+          <label>Riesgos o efectos no deseados <span class="required">*</span><span class="hint">mínimo 30 caracteres</span></label>
+          <textarea class="control" rows="3" formControlName="riesgos" maxlength="4000" [class.is-invalid]="invalido('riesgos')"></textarea>
+          <div class="invalid-feedback">Describa los riesgos o indique expresamente que no fueron identificados.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <header class="block-head">
+        <h2>Viabilidad</h2>
+        <p>Valoración técnica y jurídica, con la justificación de cada nivel.</p>
+      </header>
+      <div class="block-body">
+        <div class="row-2">
+          <div class="field">
+            <label>Nivel de viabilidad técnica <span class="required">*</span></label>
+            <select class="control" formControlName="nivel_viabilidad_tecnica" [class.is-invalid]="invalido('nivel_viabilidad_tecnica')">
+              <option [ngValue]="null">Seleccione...</option>
+              <option>Alta</option><option>Media</option><option>Baja</option>
+            </select>
+            <div class="invalid-feedback">Seleccione un nivel.</div>
+          </div>
+          <div class="field">
+            <label>Nivel de viabilidad jurídica <span class="required">*</span></label>
+            <select class="control" formControlName="nivel_viabilidad_juridica" [class.is-invalid]="invalido('nivel_viabilidad_juridica')">
+              <option [ngValue]="null">Seleccione...</option>
+              <option>Alta</option><option>Media</option><option>Baja</option>
+            </select>
+            <div class="invalid-feedback">Seleccione un nivel.</div>
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Justificación técnica <span class="required">*</span><span class="hint">mínimo 30 caracteres</span></label>
+            <textarea class="control" rows="2" formControlName="justificacion_tecnica" maxlength="3000" [class.is-invalid]="invalido('justificacion_tecnica')"></textarea>
+            <div class="invalid-feedback">Justifique la viabilidad técnica en al menos 30 caracteres.</div>
+          </div>
+          <div class="field">
+            <label>Justificación jurídica <span class="required">*</span><span class="hint">mínimo 30 caracteres</span></label>
+            <textarea class="control" rows="2" formControlName="justificacion_juridica" maxlength="3000" [class.is-invalid]="invalido('justificacion_juridica')"></textarea>
+            <div class="invalid-feedback">Justifique la viabilidad jurídica en al menos 30 caracteres.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <header class="block-head">
+        <h2>Conclusión del análisis</h2>
+        <p>Escenarios de éxito y de fracaso, y la recomendación que cierra el expediente.</p>
+      </header>
+      <div class="block-body">
+        <div class="row-2">
+          <div class="field">
+            <label>Qué funcionaría <span class="required">*</span><span class="hint">mínimo 30 caracteres</span></label>
+            <textarea class="control" rows="2" formControlName="que_funcionaria" maxlength="4000" [class.is-invalid]="invalido('que_funcionaria')"></textarea>
+            <div class="invalid-feedback">Describa los elementos con posibilidad de éxito.</div>
+          </div>
+          <div class="field">
+            <label>Qué podría fracasar <span class="required">*</span><span class="hint">mínimo 30 caracteres</span></label>
+            <textarea class="control" rows="2" formControlName="que_podria_fracasar" maxlength="4000" [class.is-invalid]="invalido('que_podria_fracasar')"></textarea>
+            <div class="invalid-feedback">Describa los factores de riesgo o indique que no fueron identificados.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Recomendación final <span class="required">*</span><span class="hint">mínimo 40 caracteres</span></label>
+          <textarea class="control" rows="3" formControlName="recomendacion" maxlength="4000" [class.is-invalid]="invalido('recomendacion')"></textarea>
+          <div class="invalid-feedback">Capture una recomendación final de al menos 40 caracteres.</div>
+          <div class="counter">{{ form.value.recomendacion?.length || 0 }}/4000</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="seccion-comparativas">
+      <header class="block-head d-flex justify-content-between align-items-center">
+        <div>
+          <h2>Antecedentes comparados</h2>
+          <p>Opcional. Registre cada antecedente por separado para poder consultarlo por país, estado o año.</p>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary flex-shrink-0" (click)="agregarComparativa()">
+          <i class="bi bi-plus-circle me-1"></i>Agregar antecedente
+        </button>
+      </header>
+      <div class="block-body">
+        <div formArrayName="comparativas">
+          @for (grupo of comparativas.controls; track grupo; let i = $index) {
+            <div [formGroupName]="i" class="border rounded p-3 mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong class="small">Antecedente {{ i + 1 }}</strong>
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="quitarComparativa(i)">Eliminar</button>
+              </div>
+              <div class="row g-2">
+                <div class="col-md-4"><input class="control" placeholder="País *" formControlName="pais"></div>
+                <div class="col-md-4"><input class="control" placeholder="Estado/Región" formControlName="estado_region"></div>
+                <div class="col-md-4"><input class="control" type="number" placeholder="Año *" formControlName="anio"></div>
+                <div class="col-12"><input class="control" placeholder="Nombre de la ley o iniciativa *" formControlName="nombre_ley"></div>
+                <div class="col-md-6"><input class="control" placeholder="Tema" formControlName="tema"></div>
+                <div class="col-md-6"><textarea class="control" placeholder="Resumen" formControlName="resumen"></textarea></div>
+                <div class="col-md-6"><textarea class="control" placeholder="Qué funcionó" formControlName="que_funciono"></textarea></div>
+                <div class="col-md-6"><textarea class="control" placeholder="Qué no funcionó" formControlName="que_no_funciono"></textarea></div>
+                <div class="col-12"><textarea class="control" placeholder="Relevancia para el Estado de México" formControlName="relevancia_edomex"></textarea></div>
+              </div>
+            </div>
+          } @empty {
+            <p class="text-muted small mb-0">Opcional. Registre antecedentes nacionales o internacionales relacionados.</p>
+          }
+        </div>
+      </div>
+    </section>
+
+    <div class="d-flex justify-content-end gap-2 mb-5">
+      <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+        @if (guardando()) {
+          <span class="spinner-border spinner-border-sm me-2"></span>Guardando...
+        } @else {
+          {{ iniciativaId() ? 'Guardar cambios' : 'Registrar iniciativa' }}
+        }
+      </button>
+    </div>
+
+    </div>
+    </div>
+  </form>
+</div>

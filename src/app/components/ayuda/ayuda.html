@@ -1,0 +1,211 @@
+<div class="container-fluid py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h4 fw-bold mb-1">Guía de usuario</h1>
+      <p class="text-muted mb-0">Manual operativo del sistema: captura, consulta, catálogos, carga masiva y auditoría.</p>
+    </div>
+    <button class="btn btn-outline-secondary" (click)="imprimir()"><i class="bi bi-printer me-1"></i>Imprimir o guardar en PDF</button>
+  </div>
+
+  <div class="row g-4">
+    <!-- Índice -->
+    <div class="col-lg-3 d-none d-lg-block">
+      <div class="card border-0 shadow-sm" style="position:sticky; top:1rem">
+        <div class="card-body">
+          <h2 class="h6 fw-bold">Contenido</h2>
+          <ol class="small ps-3 mb-0">
+            <li><a href="#g1">Qué hace este sistema</a></li>
+            <li><a href="#g2">Resumen operativo</a></li>
+            <li><a href="#g3">Consulta de iniciativas</a></li>
+            <li><a href="#g4">Registrar y editar una iniciativa</a></li>
+            <li><a href="#g5">Campos de selección múltiple</a></li>
+            <li><a href="#g6">Antecedentes comparados</a></li>
+            <li><a href="#g7">Carga masiva desde CSV</a></li>
+            <li><a href="#g8">Análisis pendientes</a></li>
+            <li><a href="#g9">Catálogos</a></li>
+            <li><a href="#g10">Auditoría</a></li>
+            <li><a href="#g11">Mensajes del sistema</a></li>
+            <li><a href="#g12">Alcance de esta versión</a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenido -->
+    <div class="col-lg-9">
+
+      <section id="g1" class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h2 class="h5 fw-bold">1. Qué hace este sistema</h2>
+          <p>El Sistema de Iniciativas concentra el expediente de cada iniciativa presentada ante la Legislatura: su ficha técnica, el análisis integral que elabora el Instituto, los antecedentes comparados de otros estados o países, y una bitácora de quién capturó o modificó cada expediente.</p>
+          <p class="mb-0">A diferencia de un prototipo de navegador, la información se guarda en una base de datos MariaDB real: lo que un usuario captura lo ve cualquier otro usuario con sesión, desde cualquier equipo, y persiste aunque se borre el caché del navegador.</p>
+        </div>
+      </section>
+
+      <section id="g2" class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h2 class="h5 fw-bold">2. Resumen operativo</h2>
+          <p>Es la pantalla de entrada. Sus indicadores se calculan en el momento a partir de los registros existentes:</p>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead><tr><th>Indicador</th><th>Qué cuenta</th></tr></thead>
+              <tbody>
+                <tr><td>Total de iniciativas</td><td>Todos los expedientes registrados en el sistema</td></tr>
+                <tr><td>En estudio / Aprobadas</td><td>Expedientes con ese estatus, y su porcentaje sobre el total</td></tr>
+                <tr><td>Sin recomendación</td><td>Expedientes cuyo análisis integral no está cerrado (la recomendación final sigue vacía)</td></tr>
+                <tr><td>Iniciativas por estatus</td><td>Barra por cada estatus que realmente tenga expedientes; un estatus nuevo aparece en cuanto se use</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="mb-0 text-muted small">Un expediente se considera completo cuando tiene capturada la recomendación final, no antes. El detalle de ese avance está en <a routerLink="/pendientes">Análisis pendientes</a>.</p>
+        </div>
+      </section>
+
+      <section id="g3" class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h2 class="h5 fw-bold">3. Consulta de iniciativas</h2>
+          <p>Lista todos los expedientes con número, título, estatus, legislatura y fecha. El buscador de la parte superior filtra la tabla conforme escribe, sobre las columnas visibles.</p>
+          <p class="mb-0">Desde la columna Acciones puede <b>Ver</b> un resumen rápido, <b>Editar</b> para abrir el expediente completo en el formulario, o <b>Eliminar</b>, que pide confirmación nombrando la iniciativa antes de borrarla de forma definitiva.</p>
+        </div>
+      </section>
+
+      <section id="g4" class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h2 class="h5 fw-bold">4. Registrar y editar una iniciativa</h2>
+          <p>El formulario captura en una sola pantalla, dividida en secciones, la ficha técnica y el análisis integral. Todos los campos marcados con <span class="text-danger">*</span> son obligatorios para guardar; el sistema marca en rojo los que falten o no cumplan la longitud mínima.</p>
+
+          <h3 class="h6 fw-bold mt-3">Ficha técnica</h3>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead><tr><th>Campo</th><th>Regla</th></tr></thead>
+              <tbody>
+                <tr><td>Número de iniciativa</td><td>Solo dígitos; debe ser único en el sistema</td></tr>
+                <tr><td>Fecha de presentación</td><td>No puede ser posterior al día de hoy</td></tr>
+                <tr><td>Legislatura y estatus</td><td>Se eligen del catálogo correspondiente</td></tr>
+                <tr><td>Título</td><td>Mínimo 20 caracteres</td></tr>
+                <tr><td>Promoventes, partidos, temas, comisiones</td><td>Al menos uno de cada uno, tomados del catálogo (admiten varios)</td></tr>
+                <tr><td>Subtema</td><td>Mínimo 5 caracteres</td></tr>
+                <tr><td>Resumen técnico</td><td>Mínimo 80 caracteres; es el que resume el expediente en la consulta</td></tr>
+                <tr><td>Palabras clave</td><td>Al menos tres, distintas, separadas por coma</td></tr>
+                <tr><td>Enlace al documento</td><td>Opcional; si se captura debe iniciar con <code>http://</code> o <code>https://</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="h6 fw-bold mt-3">Análisis integral</h3>
+          <p class="mb-2">Problema público (mínimo 60 caracteres), objetivo (40), resumen general del análisis (80), beneficios y riesgos (30 cada uno), los dos niveles de viabilidad con su justificación (30 cada una), qué funcionaría y qué podría fracasar (30 cada uno) y la recomendación final (40).</p>
+          <div class="alert alert-warning small py-2 mb-0">
+            Los campos de riesgos y de "qué podría fracasar" no deben quedar vacíos: si el análisis no encontró ninguno, indíquelo expresamente. Un campo vacío no distingue entre "no hay" y "no se revisó".
+          </div>
+        </div>
+      </section>
+
+      <section id="g5" class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h2 class="h5 fw-bold">5. Campos de selección múltiple</h2>
+          <p>Personas promoventes, grupos parlamentarios, temas y comisiones turnadas funcionan igual entre sí: son listas desplegables de selección múltiple que solo ofrecen valores ya existentes en su catálogo, para que todos capturen el mismo nombre de la misma forma.</p>
+          <p class="mb-0">Si el valor que necesita no está en la lista, dese de alta primero en <a routerLink="/catalogos">Catálogos</a> y quedará disponible de inmediato en el formulario. Evite crear variantes del mismo nombre ("Finanzas Publicas" junto a "Finanzas Públicas"): dividen las estadísticas y los filtros. Si ya ocurrió, renombrar el valor en Catálogos lo corrige en todas las iniciativas que lo usan.</p>
+        </div>
+      </section>
+
+      <section id="g6" class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h2 class="h5 fw-bold">6. Antecedentes comparados</h2>
+          <p class="mb-0">Al final del formulario puede agregar, de forma opcional, uno o varios antecedentes nacionales o internacionales relacionados con la iniciativa: país, año y nombre de la ley son obligatorios; estado o región, tema, resumen, impacto, qué funcionó, qué no funcionó y relevancia para el Estado de México son opcionales. Todos los antecedentes capturados en cualquier iniciativa se consultan juntos en <a routerLink="/comparativas">Comparativas</a>.</p>
+        </div>
+      </section>
+
+      <section id="g7" class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h2 class="h5 fw-bold">7. Carga masiva desde CSV</h2>
+          <p>Permite importar cientos de iniciativas desde un archivo CSV en tres pasos, todos en la misma pantalla:</p>
+          <ol>
+            <li><b>Archivo.</b> Arrastre o seleccione el CSV (UTF-8, con encabezados). El sistema detecta automáticamente si el separador es coma, punto y coma o tabulador. Si no tiene un archivo a la mano, descargue la <span class="ui">Plantilla</span>.</li>
+            <li><b>Correspondencia de columnas.</b> Las columnas se asignan automáticamente por nombre, tolerando acentos y mayúsculas distintas. Corrija manualmente cualquier campo mal asignado; la validación se rehace al instante.</li>
+            <li><b>Validación e importación.</b> Cada fila se clasifica en <span class="badge bg-success">Correcta</span>, <span class="badge bg-warning text-dark">Con advertencia</span> (se importa igual: sin partido, sin tema, sin comisión, estatus fuera de catálogo, enlace mal formado o número repetido) o <span class="badge bg-danger">Con error</span> (no se importa: número vacío o no numérico, título de menos de 10 caracteres, fecha ilegible o sin promovente).</li>
+          </ol>
+          <p>Antes de importar puede descargar el <span class="ui">Reporte de incidencias</span> en CSV para corregir en Excel y volver a cargar. Las opciones adicionales controlan:</p>
+          <ul class="mb-2">
+            <li><b>Valores múltiples separados por</b>: cómo dividir una celda con varios promoventes, partidos, temas o comisiones.</li>
+            <li><b>Si el número ya existe</b>: omitir la fila o actualizar el expediente existente. El número de iniciativa es único en la base de datos, así que no es posible crear dos expedientes con el mismo número.</li>
+            <li><b>Agregar a los catálogos los valores nuevos</b>: si se deja activa, cualquier persona promovente, partido, tema, comisión, legislatura o estatus del archivo que no exista en su catálogo se crea automáticamente; si se desactiva, esas filas se importan sin esa relación.</li>
+          </ul>
+          <p class="mb-0">Al terminar, un mensaje resume cuántas altas, actualizaciones y omisiones hubo, y el detalle queda asentado en <a routerLink="/auditoria">Auditoría</a> con el nombre del archivo.</p>
+        </div>
+      </section>
+
+      <section id="g8" class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h2 class="h5 fw-bold">8. Análisis pendientes</h2>
+          <p class="mb-0">Lista los expedientes sin recomendación final capturada, para dar seguimiento a lo que falta cerrar. A la derecha se muestra el avance general: cuántos expedientes tienen el análisis cerrado respecto del total.</p>
+        </div>
+      </section>
+
+      <section id="g9" class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h2 class="h5 fw-bold">9. Catálogos</h2>
+          <p>Los seis catálogos administrables son la base de la calidad de los datos: definen los valores que se pueden elegir al capturar y los que se usan como filtros y en la carga masiva.</p>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead><tr><th>Catálogo</th><th>Nota</th></tr></thead>
+              <tbody>
+                <tr><td>Personas legisladoras y promoventes</td><td>Se enriquece también con cada carga masiva</td></tr>
+                <tr><td>Grupos parlamentarios y partidos</td><td>Incluye órganos y otros tipos de promovente</td></tr>
+                <tr><td>Temas</td><td>Clasificación temática de las iniciativas</td></tr>
+                <tr><td>Legislaturas</td><td>El rango de años entre paréntesis es lo que permite inferirla en la carga masiva</td></tr>
+                <tr><td>Comisiones</td><td>Suele ser el catálogo que más depuración requiere</td></tr>
+                <tr><td>Estatus</td><td>Incluye "Borrador" como valor interno</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="mb-0">Desde <span class="ui">Administrar</span> puede agregar un valor nuevo, editarlo (se actualiza en todas las iniciativas que lo usan) o eliminarlo. Los valores se rechazan como duplicados sin distinguir acentos ni mayúsculas.</p>
+        </div>
+      </section>
+
+      <section id="g10" class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h2 class="h5 fw-bold">10. Auditoría</h2>
+          <p class="mb-0">Bitácora de todo lo que modifica el contenido del sistema: registro, edición y eliminación de iniciativas; alta, edición y baja de valores de catálogo; y cada carga masiva con el nombre del archivo y el desglose de altas, actualizaciones y omisiones. Cada renglón identifica al usuario que realizó la acción con su RFC.</p>
+        </div>
+      </section>
+
+      <section id="g11" class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h2 class="h5 fw-bold">11. Mensajes del sistema y qué hacer</h2>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead><tr><th>Mensaje</th><th>Qué hacer</th></tr></thead>
+              <tbody>
+                <tr><td>Formulario incompleto</td><td>Revise los campos marcados en rojo; el mensaje bajo cada uno indica la regla que falta cumplir.</td></tr>
+                <tr><td>El número de iniciativa debe contener solo dígitos</td><td>Quite letras, espacios o guiones del número.</td></tr>
+                <tr><td>La fecha de presentación no puede ser futura</td><td>Corrija la fecha capturada.</td></tr>
+                <tr><td>El archivo debe tener extensión .csv</td><td>Guarde nuevamente desde Excel como CSV UTF-8; no se aceptan archivos .xlsx.</td></tr>
+                <tr><td>No hay filas válidas para importar</td><td>Revise la correspondencia de columnas: probablemente Número, Título, Fecha o Promovente quedaron sin asignar.</td></tr>
+                <tr><td>Ese valor ya existe en el catálogo</td><td>Busque el valor existente en la lista; si difiere solo en escritura, edítelo para unificarlo.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="g12" class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h2 class="h5 fw-bold">12. Alcance de esta versión</h2>
+          <p>Lo que ya está construido y en operación:</p>
+          <ul>
+            <li>Captura, consulta, edición y eliminación de iniciativas contra una base de datos real (MariaDB), con inicio de sesión corporativo por RFC.</li>
+            <li>Catálogos administrables, carga masiva desde CSV con validación de tres niveles, análisis pendientes, comparativas y auditoría por usuario.</li>
+          </ul>
+          <p>Lo que todavía no está incluido en esta plantilla y queda para una siguiente iteración:</p>
+          <ul class="mb-0">
+            <li><b>Portal público.</b> Una vista de consulta ciudadana sin autenticación, que muestre solo la información no confidencial de las iniciativas, aún no se ha construido.</li>
+            <li><b>Exportación de resultados de la consulta.</b> Descargar en CSV lo que arroja una búsqueda todavía no está disponible en <a routerLink="/iniciativas">Consulta de iniciativas</a>.</li>
+            <li><b>Guardar borrador con validación parcial.</b> Hoy, para registrar una iniciativa —incluso con estatus "Borrador"— deben completarse todos los campos obligatorios; no existe un atajo que solo pida número, fecha, título y un promovente.</li>
+            <li><b>Contador de uso por valor de catálogo y restauración a valores base.</b> Los catálogos no muestran todavía cuántas iniciativas usan cada valor antes de eliminarlo, ni ofrecen restaurar los valores originales de la plantilla.</li>
+          </ul>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>

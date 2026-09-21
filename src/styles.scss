@@ -1,0 +1,299 @@
+/* You can add global styles to this file, and also import other style files */
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+@import "@ng-select/ng-select/themes/default.theme.css";
+
+// Variables para colores institucionales del Instituto de Estudios Legislativos (INESLE)
+// Se mantiene la misma paleta guinda/dorado del Poder Legislativo del Estado de México
+// que ya utiliza el mockup funcional del sistema.
+$guinda: #96134B;
+$dorado: #BB945C;
+$gris-claro: #f5f5f7;
+
+// Sobrescribir colores primarios de Bootstrap
+$primary: $guinda;
+$secondary: $dorado;
+$body-bg: $gris-claro;
+
+// Opcional: Modificar la fuente a una más institucional (Inter, Roboto)
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+$font-family-base: 'Inter', sans-serif;
+
+// Importar Bootstrap SCSS
+@import "bootstrap/scss/bootstrap";
+
+.ng-dropdown-panel {
+  background: #ffffff !important;
+  border: 1px solid #ced4da !important;
+  z-index: 9999 !important;
+}
+
+.ng-dropdown-panel .ng-option {
+  background: #ffffff !important;
+  color: #212529 !important;
+}
+
+.ng-dropdown-panel .ng-option.ng-option-marked {
+  background: #e9ecef !important;
+  color: #212529 !important;
+}
+
+.ng-select .ng-select-container {
+  background: #ffffff !important;
+}
+
+
+// Estilos globales de utilidad
+.bg-guinda {
+    background-color: $guinda !important;
+    color: white;
+}
+
+.text-dorado {
+    color: $dorado !important;
+}
+
+.text-guinda {
+    color: $guinda !important;
+}
+
+.btn-primary {
+    background-color: $guinda;
+    border-color: $guinda;
+    &:hover {
+        background-color: darken($guinda, 10%);
+        border-color: darken($guinda, 10%);
+    }
+}
+
+// Micro-animaciones para hacerlo dinámico
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+}
+
+.sidebar {
+    height: 100vh;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    background-color: white;
+
+    .dropdown-item {
+        &:active, &.active {
+            background-color: rgba(255, 255, 255, 0.12);
+            color: white;
+        }
+        &:focus {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: white;
+        }
+    }
+}
+
+.navbar {
+    .dropdown-item {
+        &:active, &.active {
+            background-color: #f1f3f5;
+            color: inherit;
+        }
+        &:focus {
+            background-color: #f8f9fa;
+            color: inherit;
+        }
+    }
+}
+
+.main-content {
+    min-height: 100vh;
+}
+
+// ── Estilo de formularios tipo "ficha" (tomado del mockup del sistema) ─────
+// .block/.field/.control replican la captura de datos del mockup: título de
+// sección con descripción, etiqueta con el hint/asterisco alineado a la
+// derecha, y contador de caracteres bajo los textarea con máximo.
+.block {
+    background: #fff;
+    border: 1px solid #dedee4;
+    border-radius: 16px;
+    box-shadow: 0 3px 14px rgba(25, 20, 23, .035);
+    margin-bottom: 18px;
+    overflow: hidden;
+}
+
+.block-head {
+    padding: 17px 22px;
+    border-bottom: 1px solid #dedee4;
+    background: #fcfbfc;
+
+    h2 {
+        margin: 0;
+        font-size: 15px;
+        color: #401327;
+        font-weight: 700;
+    }
+
+    p {
+        margin: 4px 0 0;
+        font-size: 12px;
+        color: #686973;
+        line-height: 1.5;
+    }
+}
+
+.block-body {
+    padding: 22px;
+    display: grid;
+    gap: 20px;
+
+    .row-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+    .row-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    &.row-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    @media (max-width: 767.98px) {
+        .row-3, .row-2 { grid-template-columns: 1fr; }
+    }
+}
+
+.field {
+    min-width: 0;
+
+    > label {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        margin: 0 0 7px;
+        color: #414149;
+    }
+}
+
+.required {
+    color: #b42318;
+}
+
+.hint {
+    font-size: 11px;
+    color: #686973;
+    font-weight: 450;
+}
+
+.control {
+    width: 100%;
+    min-height: 42px;
+    border: 1px solid #cfcfd6;
+    border-radius: 9px;
+    padding: 9px 11px;
+    background: #fff;
+    color: #25252a;
+    outline: none;
+
+    &:focus {
+        border-color: $guinda;
+        box-shadow: 0 0 0 3px rgba($guinda, .1);
+        outline: none;
+    }
+
+    &.is-invalid {
+        border-color: #b42318;
+        background: #fffafa;
+
+        &:focus {
+            box-shadow: 0 0 0 3px rgba(#b42318, .1);
+        }
+    }
+}
+
+textarea.control {
+    min-height: 106px;
+    resize: vertical;
+    line-height: 1.45;
+}
+
+.counter {
+    text-align: right;
+    color: #686973;
+    font-size: 10px;
+    margin-top: 4px;
+}
+
+// ── Selector "de catálogo + Agregar + Dar de alta" ──────────────────────────
+.inline-add {
+    display: flex;
+    gap: 9px;
+
+    .control { flex: 1; }
+}
+
+.picker {
+    border: 1px dashed #d5d5dd;
+    border-radius: 12px;
+    padding: 13px;
+    background: #fbfafb;
+}
+
+.picker-hint {
+    margin: 11px 0 0;
+    font-size: 11px;
+    color: #686973;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 11px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: rgba($guinda, .08);
+    color: $guinda;
+    font-size: 12px;
+    font-weight: 700;
+
+    button {
+        border: 0;
+        background: transparent;
+        color: inherit;
+        padding: 0;
+        font-weight: 900;
+        line-height: 1;
+        cursor: pointer;
+    }
+}
+
+.picker.is-invalid {
+    border-color: #b42318;
+}
+
+.btn-dorado {
+    background-color: $dorado;
+    border-color: $dorado;
+    color: #2c2215;
+
+    &:hover {
+        background-color: darken($dorado, 8%);
+        border-color: darken($dorado, 8%);
+        color: #2c2215;
+    }
+}
+
+// ── Responsive global ──────────────────────────────────────────────────────────
+@media (max-width: 991.98px) {
+  // Offcanvas sidebar toma el ancho completo en móvil
+  .offcanvas.offcanvas-start {
+    width: 100% !important;
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  // Espaciado global más compacto en pantallas pequeñas
+  .container-fluid.py-4 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+}

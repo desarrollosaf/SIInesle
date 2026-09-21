@@ -1,0 +1,106 @@
+<div class="login-page d-flex align-items-center justify-content-center min-vh-100">
+
+  <!-- Fondo decorativo -->
+  <div class="login-bg-overlay"></div>
+
+  <div class="login-card card border-0 shadow-lg">
+
+    <!-- Encabezado institucional -->
+    <div class="login-card-header text-center py-4 px-4">
+      <div class="login-escudo mb-3">
+        <i class="bi bi-journal-bookmark-fill fs-1"></i>
+      </div>
+      <h4 class="fw-bold mb-1">Sistema de Iniciativas</h4>
+      <p class="mb-0 small opacity-75">Instituto de Estudios Legislativos · INESLE</p>
+    </div>
+
+    <!-- Cuerpo del formulario -->
+    <div class="card-body px-4 py-4">
+
+      <p class="text-center text-muted small mb-4">
+        Ingrese su <strong>RFC</strong> y contraseña para acceder al sistema
+      </p>
+
+      <!-- Alerta de error -->
+      @if (errorMsg()) {
+        <div class="alert alert-danger d-flex align-items-center gap-2 py-2 small" role="alert">
+          <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+          <span>{{ errorMsg() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate autocomplete="off">
+
+        <!-- RFC -->
+        <div class="mb-3">
+          <label class="form-label login-label">
+            <i class="bi bi-person-vcard me-1"></i>RFC
+          </label>
+          <input
+            type="text"
+            class="form-control login-input"
+            formControlName="rfc"
+            placeholder="Ej. ABCD123456"
+            maxlength="10"
+            autocomplete="off"
+            style="text-transform: uppercase"
+            [class.is-invalid]="isInvalid('rfc')">
+          @if (isInvalid('rfc')) {
+            <div class="invalid-feedback">
+              El RFC debe tener exactamente 10 caracteres.
+            </div>
+          }
+        </div>
+
+        <!-- Contraseña -->
+        <div class="mb-4">
+          <label class="form-label login-label">
+            <i class="bi bi-lock me-1"></i>Contraseña
+          </label>
+          <div class="input-group">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              class="form-control login-input"
+              formControlName="password"
+              placeholder="Ingrese su contraseña"
+              autocomplete="off"
+              [attr.readonly]="passwordReadonly ? '' : null"
+              (focus)="passwordReadonly = false"
+              [class.is-invalid]="isInvalid('password')">
+            <button
+              type="button"
+              class="btn login-eye-btn"
+              (click)="togglePassword()"
+              [title]="showPassword ? 'Ocultar' : 'Mostrar'">
+              <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
+            </button>
+            @if (isInvalid('password')) {
+              <div class="invalid-feedback">La contraseña es requerida.</div>
+            }
+          </div>
+        </div>
+
+        <!-- Botón -->
+        <button
+          type="submit"
+          class="btn login-btn w-100"
+          [disabled]="loading()">
+          @if (loading()) {
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Verificando...
+          } @else {
+            <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+          }
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Pie -->
+    <div class="login-card-footer text-center py-3 small text-muted">
+      <i class="bi bi-shield-lock me-1"></i>Acceso restringido al personal autorizado
+    </div>
+
+  </div>
+
+</div>

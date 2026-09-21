@@ -1,0 +1,161 @@
+// ── Variables ─────────────────────────────────────────────────────────────────
+$guinda: #96134B;
+$guinda-dark: #6b0d35;
+$dorado: #BB945C;
+$dorado-light: #d4ae7a;
+
+// ── Página completa ───────────────────────────────────────────────────────────
+.login-page {
+  position: relative;
+  background: linear-gradient(135deg, $guinda-dark 0%, $guinda 50%, #b01a5a 100%);
+  overflow: hidden;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.08;
+    background: #fff;
+  }
+
+  &::before {
+    width: 600px;
+    height: 600px;
+    top: -200px;
+    right: -150px;
+  }
+
+  &::after {
+    width: 400px;
+    height: 400px;
+    bottom: -150px;
+    left: -100px;
+  }
+}
+
+.login-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 40px,
+    rgba(255,255,255,0.02) 40px,
+    rgba(255,255,255,0.02) 80px
+  );
+}
+
+// ── Card ──────────────────────────────────────────────────────────────────────
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 1rem !important;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.4s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Header de la card ─────────────────────────────────────────────────────────
+.login-card-header {
+  background: linear-gradient(135deg, $guinda 0%, $guinda-dark 100%);
+  color: #fff;
+  border-bottom: 3px solid $dorado;
+
+  .login-escudo {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    color: $dorado-light;
+  }
+}
+
+// ── Footer de la card ─────────────────────────────────────────────────────────
+.login-card-footer {
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+// ── Labels ────────────────────────────────────────────────────────────────────
+.login-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #4b5563;
+  margin-bottom: 0.4rem;
+}
+
+// ── Inputs ────────────────────────────────────────────────────────────────────
+.login-input {
+  border-color: #d1d5db;
+  border-radius: 0.45rem;
+  font-size: 0.9rem;
+  padding: 0.55rem 0.85rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    border-color: $guinda;
+    box-shadow: 0 0 0 0.2rem rgba($guinda, 0.15);
+  }
+
+  &.is-invalid {
+    border-color: #dc3545;
+    &:focus { box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15); }
+  }
+}
+
+// ── Botón ojito ───────────────────────────────────────────────────────────────
+.login-eye-btn {
+  border: 1px solid #d1d5db;
+  border-left: none;
+  background: #fff;
+  color: #6b7280;
+  border-radius: 0 0.45rem 0.45rem 0;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: #f3f4f6;
+    color: $guinda;
+    border-color: $guinda;
+  }
+}
+
+// ── Botón principal ───────────────────────────────────────────────────────────
+.login-btn {
+  background: linear-gradient(135deg, $guinda 0%, $guinda-dark 100%);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 0.45rem;
+  padding: 0.65rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  transition: opacity 0.2s, box-shadow 0.2s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+    box-shadow: 0 4px 14px rgba($guinda, 0.45);
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+  }
+
+  // línea dorada sutil en el borde inferior
+  border-bottom: 2px solid $dorado;
+}

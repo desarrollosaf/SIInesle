@@ -1,0 +1,24 @@
+:host ::ng-deep .act-cell {
+  display: flex;
+  gap: 6px;
+  height: 100%;
+  align-items: center;
+}
+
+:host ::ng-deep .act-btn {
+  border: none;
+  background: transparent;
+  font-size: 0.78rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+:host ::ng-deep .act-btn-ver { color: #285ca8; }
+:host ::ng-deep .act-btn-editar { color: #96134B; }
+:host ::ng-deep .act-btn-eliminar { color: #b42318; }
+
+:host ::ng-deep .act-btn:hover { background: rgba(0, 0, 0, 0.06); }

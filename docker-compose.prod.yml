@@ -1,0 +1,51 @@
+# Entorno de producción: construye las imágenes (Angular compilado y servido
+# por nginx; Nest compilado a JS) en lugar de correr con hot-reload.
+#
+# Antes del primer arranque:
+#   cp backend/.env.example backend/.env   y captura las credenciales reales
+#
+# Uso:
+#   docker compose -f docker-compose.prod.yml up -d --build
+#   docker compose -f docker-compose.prod.yml exec backend npm run seed:run   (solo la primera vez)
+#
+# Las migraciones se aplican solas al arrancar el contenedor del backend
+# (ver backend/Dockerfile); la siembra de catálogos es un paso consciente
+# único y por eso no se automatiza aquí.
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: DockerFile
+      args:
+        # Ruta bajo la que quedará publicado detrás del proxy/dominio real.
+        # Ajusta este valor (y el de CORS_ORIGIN / endpoint del frontend) a
+        # como quede resuelto en el servidor.
+        BASE_HREF: /iniciativas/
+    container_name: siinesle-frontend
+    ports:
+      - "8089:80"
+    restart: always
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: siinesle-backend
+    ports:
+      - "3033:3001"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/storage:/app/storage
+    restart: always
+    extra_hosts:
+      # Si el MariaDB de "iniciativas_inesle" y "saf" vive en este mismo
+      # servidor (fuera de Docker), deja esta línea y usa DB_HOST=
+      # host.docker.internal / SAF_DB_HOST=host.docker.internal en
+      # backend/.env. Si vive en otro servidor, reemplaza esta línea por su
+      # nombre real apuntando a su IP, como en:
+      #   - "mi-servidor-db.interno:10.0.0.25"
+      - "host.docker.internal:host-gateway"

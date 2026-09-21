@@ -1,0 +1,76 @@
+# Entorno de desarrollo: corre el frontend y el backend con hot-reload,
+# montando el código fuente como volumen. No levanta un contenedor de base
+# de datos: se conecta al MariaDB que ya corre en este equipo (host.docker.
+# internal), igual que el resto de los sistemas internos.
+#
+# Uso:
+#   docker compose up
+#   docker compose exec backend npm run seed:run   (solo la primera vez)
+
+services:
+  frontend:
+    image: node:22-alpine
+    container_name: siinesle-frontend
+    working_dir: /app
+
+    ports:
+      - "4201:4201"
+
+    volumes:
+      - .:/app
+      - frontend_node_modules:/app/node_modules
+      - /app/backend
+
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+
+    command: >
+      sh -c "npm install &&
+      npm run start --
+      --host 0.0.0.0
+      --port 4201
+      --poll=1000"
+
+    depends_on:
+      - backend
+
+    restart: unless-stopped
+
+  backend:
+    image: node:22-alpine
+    container_name: siinesle-backend
+    working_dir: /app
+
+    ports:
+      - "3001:3001"
+
+    volumes:
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+
+    env_file:
+      - ./backend/.env
+
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      CHOKIDAR_USEPOLLING: "true"
+      # El backend corre en Docker; el MariaDB con "iniciativas_inesle" y con
+      # "saf" vive en este mismo equipo, fuera de Docker. Estas dos líneas
+      # sobreescriben lo que diga backend/.env solo dentro de este contenedor.
+      DB_HOST: host.docker.internal
+      SAF_DB_HOST: host.docker.internal
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    command: >
+      sh -c "npm install &&
+      npm run migration:run &&
+      npm run start:dev"
+
+    restart: unless-stopped
+
+volumes:
+  frontend_node_modules:
+  backend_node_modules:

@@ -1,0 +1,41 @@
+<div class="container-fluid py-4">
+  <h1 class="h4 fw-bold mb-1">Análisis pendientes</h1>
+  <p class="text-muted mb-4">Seguimiento de iniciativas sin recomendación final o con campos incompletos.</p>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white fw-bold">Prioridad de revisión</div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            @for (r of pendientes(); track r.id) {
+              <a [routerLink]="['/iniciativas/editar', r.id]" class="list-group-item list-group-item-action">
+                <div class="d-flex justify-content-between">
+                  <strong>{{ r.numero }} · {{ r.titulo }}</strong>
+                  <span class="badge bg-warning-subtle text-warning-emphasis">{{ r.estatus?.nombre ?? 'Sin estatus' }}</span>
+                </div>
+              </a>
+            } @empty {
+              <p class="text-muted small p-3 mb-0">No hay iniciativas pendientes de análisis.</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white fw-bold">Avance de análisis</div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-2">
+            <strong>{{ completadas() }} de {{ total() }}</strong>
+            <span class="text-muted">{{ porcentaje() }}%</span>
+          </div>
+          <div class="bg-light rounded-pill" style="height:10px">
+            <div class="bg-guinda rounded-pill" style="height:10px" [style.width.%]="porcentaje()"></div>
+          </div>
+          <p class="text-muted small mt-3 mb-0">Se consideran completos los registros con recomendación final capturada.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

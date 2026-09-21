@@ -1,0 +1,104 @@
+<div class="sidebar d-flex flex-column h-100">
+
+  <!-- ── Encabezado: marca + usuario ─────────────────── -->
+  <div class="sidebar-header d-flex align-items-center gap-3 px-4">
+    <div class="sidebar-brand-icon-wrap flex-shrink-0">
+      <i class="bi bi-journal-bookmark-fill"></i>
+    </div>
+    <div class="min-w-0">
+      <p class="sidebar-brand-name mb-0">Sistema de Iniciativas</p>
+      <p class="sidebar-brand-org mb-0">Instituto de Estudios Legislativos</p>
+    </div>
+  </div>
+
+  <!-- ── Navegación ──────────────────────────────────── -->
+  <div class="px-3 pt-2 d-flex flex-column flex-grow-1 overflow-auto" style="min-height:0">
+    <span class="sidebar-section-label">OPERACIÓN</span>
+
+    <ul class="nav flex-column gap-1">
+      <li class="nav-item">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"
+           class="nav-link sidebar-link d-flex align-items-center gap-3">
+          <span class="sidebar-icon-wrap"><i class="bi bi-grid-1x2-fill fs-5"></i></span>
+          <span>Resumen</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/iniciativas" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"
+           class="nav-link sidebar-link d-flex align-items-center gap-3">
+          <span class="sidebar-icon-wrap"><i class="bi bi-search fs-5"></i></span>
+          <span>Consulta de iniciativas</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/iniciativas/crear" routerLinkActive="active"
+           class="nav-link sidebar-link d-flex align-items-center gap-3">
+          <span class="sidebar-icon-wrap"><i class="bi bi-plus-circle-fill fs-5"></i></span>
+          <span>Nueva iniciativa</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/import-masivo" routerLinkActive="active"
+           class="nav-link sidebar-link d-flex align-items-center gap-3">
+          <span class="sidebar-icon-wrap"><i class="bi bi-upload fs-5"></i></span>
+          <span>Carga masiva CSV</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/pendientes" routerLinkActive="active"
+           class="nav-link sidebar-link d-flex align-items-center gap-3">
+          <span class="sidebar-icon-wrap"><i class="bi bi-hourglass-split fs-5"></i></span>
+          <span>Análisis pendientes</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/comparativas" routerLinkActive="active"
+           class="nav-link sidebar-link d-flex align-items-center gap-3">
+          <span class="sidebar-icon-wrap"><i class="bi bi-columns-gap fs-5"></i></span>
+          <span>Comparativas</span>
+        </a>
+      </li>
+    </ul>
+
+    <span class="sidebar-section-label mt-3">ADMINISTRACIÓN</span>
+    <ul class="nav flex-column gap-1">
+      <li class="nav-item">
+        <a routerLink="/catalogos" routerLinkActive="active"
+           class="nav-link sidebar-link d-flex align-items-center gap-3">
+          <span class="sidebar-icon-wrap"><i class="bi bi-list-ul fs-5"></i></span>
+          <span>Catálogos</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/auditoria" routerLinkActive="active"
+           class="nav-link sidebar-link d-flex align-items-center gap-3">
+          <span class="sidebar-icon-wrap"><i class="bi bi-check2-square fs-5"></i></span>
+          <span>Auditoría</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/ayuda" routerLinkActive="active"
+           class="nav-link sidebar-link d-flex align-items-center gap-3">
+          <span class="sidebar-icon-wrap"><i class="bi bi-question-circle-fill fs-5"></i></span>
+          <span>Guía de usuario</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ── Usuario (fijo al fondo) ─────────────────────── -->
+  <div class="px-3 pb-3 pt-2 border-top">
+    @if (auth.usuario(); as u) {
+      <div class="d-flex align-items-center gap-2 px-2 py-2">
+        <div class="sidebar-user-avatar rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        <div class="min-w-0">
+          <p class="mb-0 small fw-semibold text-truncate">{{ u.nombre_completo }}</p>
+          <p class="mb-0 sidebar-brand-org text-truncate">{{ u.puesto || 'Administrador' }}</p>
+        </div>
+      </div>
+    }
+  </div>
+
+</div>

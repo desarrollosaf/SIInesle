@@ -1,0 +1,33 @@
+<div class="container-fluid py-4">
+  <h1 class="h4 fw-bold mb-1">Auditoría</h1>
+  <p class="text-muted mb-4">Historial de altas y cambios realizados en el sistema.</p>
+
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Fecha y hora</th>
+            <th>Usuario</th>
+            <th>Acción</th>
+            <th>Registro</th>
+            <th>Resultado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of registros(); track r.id) {
+            <tr>
+              <td>{{ r.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ r.usuario_nombre }}</td>
+              <td>{{ r.accion }}</td>
+              <td>{{ r.registro }}</td>
+              <td>{{ r.resultado }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="text-center text-muted py-4">Sin movimientos registrados.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

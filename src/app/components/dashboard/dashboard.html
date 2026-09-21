@@ -1,0 +1,125 @@
+<div class="container-fluid py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h4 fw-bold mb-1">Resumen operativo</h1>
+      <p class="text-muted mb-0">Panorama general de iniciativas, análisis y documentación pendiente.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a routerLink="/iniciativas" class="btn btn-outline-secondary"><i class="bi bi-search me-1"></i>Consultar</a>
+      <a routerLink="/iniciativas/crear" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i>Nueva iniciativa</a>
+    </div>
+  </div>
+
+  @if (stats(); as s) {
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <p class="text-muted small mb-1">Total de iniciativas</p>
+            <p class="h3 fw-bold mb-0">{{ s.total }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <p class="text-muted small mb-1">En estudio</p>
+            <p class="h3 fw-bold mb-0 text-dorado">{{ s.enEstudio }} <small class="fs-6 text-muted">({{ porcentaje(s.enEstudio) }}%)</small></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <p class="text-muted small mb-1">Aprobadas</p>
+            <p class="h3 fw-bold mb-0 text-success">{{ s.aprobadas }} <small class="fs-6 text-muted">({{ porcentaje(s.aprobadas) }}%)</small></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <p class="text-muted small mb-1">Sin recomendación</p>
+            <p class="h3 fw-bold mb-0 text-danger">{{ s.pendientesAnalisis }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h2 class="h6 fw-bold mb-1">Iniciativas recientes</h2>
+                <p class="text-muted small mb-0">Últimos registros disponibles para consulta.</p>
+              </div>
+              <a routerLink="/iniciativas" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+            </div>
+
+            @if (recientes().length) {
+              <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                  <thead>
+                    <tr class="text-muted small text-uppercase">
+                      <th>Número</th>
+                      <th>Título</th>
+                      <th>Tema</th>
+                      <th>Estatus</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (r of recientes(); track r.id) {
+                      <tr>
+                        <td><strong>{{ r.numero }}</strong><div class="text-muted small">ID {{ r.id }}</div></td>
+                        <td class="text-truncate" style="max-width:280px">{{ r.titulo }}</td>
+                        <td class="text-muted small">{{ r.temas?.[0]?.nombre || '—' }}</td>
+                        <td>
+                          <span class="badge rounded-pill" [ngClass]="claseEstatus(r.estatus?.nombre)">
+                            {{ r.estatus?.nombre || 'Sin estatus' }}
+                          </span>
+                        </td>
+                        <td class="text-end">
+                          <a [routerLink]="['/iniciativas/editar', r.id]" class="btn btn-sm btn-outline-secondary">Ver</a>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <p class="text-muted small mb-0">Aún no hay iniciativas registradas.</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <h2 class="h6 fw-bold mb-1">Distribución por estatus</h2>
+            <p class="text-muted small mb-3">Situación actual del universo registrado.</p>
+
+            @if (s.porEstatus.length) {
+              @for (item of s.porEstatus; track item.estatus) {
+                <div class="d-flex align-items-center gap-3 mb-2">
+                  <span class="small text-muted" style="width:100px">{{ item.estatus }}</span>
+                  <div class="flex-grow-1 bg-light rounded-pill" style="height:10px">
+                    <div class="bg-guinda rounded-pill" style="height:10px" [style.width.%]="anchoBarra(item.total)"></div>
+                  </div>
+                  <strong class="small" style="width:24px;text-align:right">{{ item.total }}</strong>
+                </div>
+              }
+            } @else {
+              <p class="text-muted small mb-0">Sin registros aún.</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else if (loading()) {
+    <p class="text-muted">Cargando estadísticas...</p>
+  }
+</div>
