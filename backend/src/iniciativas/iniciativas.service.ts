@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
+import { ForeignKeyConstraintError, Op, Transaction, UniqueConstraintError } from 'sequelize';
 import { Iniciativa } from '../models/ini-iniciativa.model';
 import { Legislatura } from '../models/ini-legislatura.model';
 import { Estatus } from '../models/ini-estatus.model';
@@ -103,8 +103,22 @@ export class IniciativasService {
   async crear(dto: CreateIniciativaDto, usuario?: UsuarioAuditoria) {
     this.validarReglasNegocio(dto);
     const { legislador_ids, partido_ids, tema_ids, comision_ids, ...datos } = dto;
-    const iniciativa = await this.iniciativaModel.create({ ...datos } as any);
-    await this.sincronizarCatalogos(iniciativa, { legislador_ids, partido_ids, tema_ids, comision_ids });
+
+    // Todo en una sola transacción: si falla la sincronización de catálogos
+    // (p. ej. un id de catálogo que ya no existe), la iniciativa tampoco se
+    // crea. Sin esto quedaba un registro a medias, sin sus relaciones.
+    let iniciativa: Iniciativa;
+    try {
+      iniciativa = await this.iniciativaModel.sequelize!.transaction(async (transaction) => {
+        const nueva = await this.iniciativaModel.create({ ...datos } as any, { transaction });
+        await this.sincronizarCatalogos(
+          nueva, { legislador_ids, partido_ids, tema_ids, comision_ids }, transaction,
+        );
+        return nueva;
+      });
+    } catch (e) {
+      throw this.traducirErrorGuardado(e, dto.numero);
+    }
 
     if (usuario) {
       await this.auditoriaService.registrar(
@@ -118,8 +132,17 @@ export class IniciativasService {
     const iniciativa = await this.findOne(id);
     this.validarReglasNegocio(dto);
     const { legislador_ids, partido_ids, tema_ids, comision_ids, ...datos } = dto;
-    await iniciativa.update(datos);
-    await this.sincronizarCatalogos(iniciativa, { legislador_ids, partido_ids, tema_ids, comision_ids });
+
+    try {
+      await this.iniciativaModel.sequelize!.transaction(async (transaction) => {
+        await iniciativa.update(datos, { transaction });
+        await this.sincronizarCatalogos(
+          iniciativa, { legislador_ids, partido_ids, tema_ids, comision_ids }, transaction,
+        );
+      });
+    } catch (e) {
+      throw this.traducirErrorGuardado(e, dto.numero ?? iniciativa.numero);
+    }
 
     if (usuario) {
       await this.auditoriaService.registrar(
@@ -175,18 +198,20 @@ export class IniciativasService {
 
         const datos = this.mapearFilaImportacion(fila, legislaturaId, estatusId);
 
-        let iniciativa: Iniciativa;
-        if (existente) {
-          await existente.update(datos as any);
-          iniciativa = existente;
-          actualizadas++;
-        } else {
-          iniciativa = await this.iniciativaModel.create(datos as any);
-          creadas++;
-        }
+        await this.iniciativaModel.sequelize!.transaction(async (transaction) => {
+          let iniciativa: Iniciativa;
+          if (existente) {
+            await existente.update(datos as any, { transaction });
+            iniciativa = existente;
+            actualizadas++;
+          } else {
+            iniciativa = await this.iniciativaModel.create(datos as any, { transaction });
+            creadas++;
+          }
 
-        await this.sincronizarCatalogos(iniciativa, {
-          legislador_ids: legisladorIds, partido_ids: partidoIds, tema_ids: temaIds, comision_ids: comisionIds,
+          await this.sincronizarCatalogos(iniciativa, {
+            legislador_ids: legisladorIds, partido_ids: partidoIds, tema_ids: temaIds, comision_ids: comisionIds,
+          }, transaction);
         });
       } catch (e: any) {
         omitidas++;
@@ -280,10 +305,29 @@ export class IniciativasService {
   private async sincronizarCatalogos(
     iniciativa: Iniciativa,
     ids: { legislador_ids?: number[]; partido_ids?: number[]; tema_ids?: number[]; comision_ids?: number[] },
+    transaction: Transaction,
   ) {
-    if (ids.legislador_ids !== undefined) await (iniciativa as any).$set('legisladores', ids.legislador_ids);
-    if (ids.partido_ids !== undefined) await (iniciativa as any).$set('partidos', ids.partido_ids);
-    if (ids.tema_ids !== undefined) await (iniciativa as any).$set('temas', ids.tema_ids);
-    if (ids.comision_ids !== undefined) await (iniciativa as any).$set('comisiones', ids.comision_ids);
+    if (ids.legislador_ids !== undefined) await (iniciativa as any).$set('legisladores', ids.legislador_ids, { transaction });
+    if (ids.partido_ids !== undefined) await (iniciativa as any).$set('partidos', ids.partido_ids, { transaction });
+    if (ids.tema_ids !== undefined) await (iniciativa as any).$set('temas', ids.tema_ids, { transaction });
+    if (ids.comision_ids !== undefined) await (iniciativa as any).$set('comisiones', ids.comision_ids, { transaction });
+  }
+
+  /**
+   * Los errores de MariaDB llegan como excepciones sin manejar y NestJS los
+   * convierte en un 500 genérico que no dice nada útil. Aquí se traducen los
+   * dos casos reales que puede tronar este guardado a un mensaje claro.
+   */
+  private traducirErrorGuardado(error: unknown, numero: string): Error {
+    if (error instanceof UniqueConstraintError) {
+      return new ConflictException(`Ya existe una iniciativa con el número ${numero}.`);
+    }
+    if (error instanceof ForeignKeyConstraintError) {
+      return new BadRequestException(
+        'Uno de los valores de catálogo seleccionados (legislatura, estatus, promovente, '
+        + 'partido, tema o comisión) ya no existe. Actualice la página e intente de nuevo.',
+      );
+    }
+    return error as Error;
   }
 }

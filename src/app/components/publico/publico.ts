@@ -1,9 +1,7 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { PublicoService, IniciativaPublica } from '../../service/publico.service';
-import { AuthService } from '../../service/auth.service';
 import { normalizarTexto } from '../../shared/csv.util';
 
 type Orden = 'recent' | 'old' | 'number' | 'title';
@@ -104,11 +102,7 @@ export class Publico implements OnInit {
     return activos;
   });
 
-  constructor(
-    private readonly publicoService: PublicoService,
-    private readonly auth: AuthService,
-    private readonly router: Router,
-  ) {}
+  constructor(private readonly publicoService: PublicoService) {}
 
   ngOnInit(): void {
     this.cargando.set(true);
@@ -183,9 +177,5 @@ export class Publico implements OnInit {
 
   cerrarDetalle(): void {
     this.detalle.set(null);
-  }
-
-  volverAlSistema(): void {
-    this.router.navigate([this.auth.isLoggedIn() ? '/' : '/login']);
   }
 }
