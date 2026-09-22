@@ -284,6 +284,137 @@ textarea.control {
     }
 }
 
+// ── Riel de avance del registro (tomado del mockup) ─────────────────────────
+.reg-rail {
+    display: grid;
+    gap: 14px;
+}
+
+.reg-progress-box {
+    background: #fff;
+    border: 1px solid #dedee4;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.reg-progress-top {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    margin-bottom: 11px;
+
+    strong {
+        font-size: 27px;
+        font-weight: 850;
+        color: $guinda;
+        line-height: 1;
+    }
+
+    span {
+        font-size: 12px;
+        color: #686973;
+    }
+}
+
+.reg-steps {
+    display: grid;
+    gap: 8px;
+}
+
+.reg-step {
+    display: grid;
+    grid-template-columns: 27px minmax(0, 1fr);
+    gap: 4px 11px;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    border: 1px solid #dedee4;
+    background: #fff;
+    border-radius: 12px;
+    padding: 13px;
+    transition: border-color .15s, background-color .15s;
+
+    span {
+        grid-row: span 2;
+        width: 27px;
+        height: 27px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: #eeeef1;
+        color: #686973;
+        font-weight: 800;
+        font-size: 12px;
+        margin: 0;
+    }
+
+    b {
+        font-size: 13px;
+        color: #3f1426;
+        font-weight: 750;
+    }
+
+    em {
+        font-style: normal;
+        font-size: 11px;
+        color: #686973;
+    }
+
+    &:hover {
+        border-color: #d9aabc;
+    }
+
+    &.active {
+        border-color: #deb2c5;
+        background: rgba($guinda, .06);
+
+        span { background: $guinda; color: #fff; }
+        b { color: $guinda; }
+    }
+
+    &.complete {
+        border-color: #bde3d5;
+
+        span { background: #13795b; color: #fff; }
+        em { color: #13795b; font-weight: 700; }
+    }
+}
+
+.reg-summary {
+    background: #fff;
+    border: 1px solid #dedee4;
+    border-radius: 16px;
+    padding: 16px;
+
+    h3 {
+        margin: 0 0 12px;
+        font-size: 12px;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #686973;
+    }
+
+    dl {
+        margin: 0;
+        display: grid;
+        gap: 10px;
+    }
+
+    dt {
+        font-size: 11px;
+        color: #686973;
+    }
+
+    dd {
+        margin: 2px 0 0;
+        font-size: 13px;
+        font-weight: 700;
+        color: #3f1426;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+}
+
 // ── Responsive global ──────────────────────────────────────────────────────────
 @media (max-width: 991.98px) {
   // Offcanvas sidebar toma el ancho completo en móvil

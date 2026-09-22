@@ -16,55 +16,46 @@
 
     <!-- Riel de avance -->
     <div class="col-lg-3 order-2 order-lg-1">
-      <div class="d-flex flex-column gap-3" style="position:sticky; top:1rem">
+      <div class="reg-rail" style="position:sticky; top:1rem">
 
-        <div class="card border-0 shadow-sm">
-          <div class="card-body">
-            <div class="d-flex align-items-baseline gap-2 mb-2">
-              <strong class="h4 mb-0 text-guinda">{{ progresoPorcentaje() }}%</strong>
-              <span class="text-muted small">de los campos obligatorios</span>
-            </div>
-            <div class="progress" style="height:6px">
-              <div class="progress-bar bg-guinda" [style.width.%]="progresoPorcentaje()"></div>
-            </div>
+        <div class="reg-progress-box">
+          <div class="reg-progress-top">
+            <strong>{{ progresoPorcentaje() }}%</strong>
+            <span>de los campos obligatorios</span>
+          </div>
+          <div class="progress" style="height:8px">
+            <div class="progress-bar bg-guinda" [style.width.%]="progresoPorcentaje()"></div>
           </div>
         </div>
 
-        <div class="card border-0 shadow-sm">
-          <div class="list-group list-group-flush">
-            <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" (click)="irASeccion('seccion-ficha')">
-              <span><span class="badge rounded-pill bg-guinda me-2">1</span>Ficha técnica</span>
-              <small class="text-muted">{{ conteoFichaTecnica() }}</small>
-            </button>
-            <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" (click)="irASeccion('seccion-analisis')">
-              <span><span class="badge rounded-pill bg-guinda me-2">2</span>Análisis integral</span>
-              <small class="text-muted">{{ conteoAnalisisIntegral() }}</small>
-            </button>
-            <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" (click)="irASeccion('seccion-comparativas')">
-              <span><span class="badge rounded-pill bg-guinda me-2">3</span>Comparativas</span>
-              <small class="text-muted">Opcional</small>
-            </button>
-          </div>
-        </div>
+        <nav class="reg-steps" aria-label="Etapas del registro">
+          <button type="button" class="reg-step" [class.active]="pasoActual() === 1" [class.complete]="pasoCompleto(1)" (click)="irAPaso(1)">
+            <span>{{ pasoCompleto(1) ? '✓' : '1' }}</span>
+            <b>Ficha técnica</b>
+            <em>{{ conteoFichaTecnica() }} campos</em>
+          </button>
+          <button type="button" class="reg-step" [class.active]="pasoActual() === 2" [class.complete]="pasoCompleto(2)" (click)="irAPaso(2)">
+            <span>{{ pasoCompleto(2) ? '✓' : '2' }}</span>
+            <b>Análisis integral</b>
+            <em>{{ conteoAnalisisIntegral() }} campos</em>
+          </button>
+          <button type="button" class="reg-step" [class.active]="pasoActual() === 3" (click)="irAPaso(3)">
+            <span>3</span>
+            <b>Comparativas</b>
+            <em>Opcional</em>
+          </button>
+        </nav>
 
-        <div class="card border-0 shadow-sm">
-          <div class="card-body">
-            <h2 class="h6 fw-bold mb-3">Lo capturado hasta ahora</h2>
-            <dl class="small mb-0">
-              <dt class="text-muted fw-normal">Número</dt>
-              <dd class="fw-semibold">{{ form.value.numero || 'Sin capturar' }}</dd>
-              <dt class="text-muted fw-normal">Legislatura</dt>
-              <dd class="fw-semibold">{{ nombreCatalogo(legislaturas(), form.value.legislatura_id) || 'Sin seleccionar' }}</dd>
-              <dt class="text-muted fw-normal">Promoventes</dt>
-              <dd class="fw-semibold">{{ resumenSeleccion(form.value.legislador_ids) }}</dd>
-              <dt class="text-muted fw-normal">Grupos parlamentarios</dt>
-              <dd class="fw-semibold">{{ resumenSeleccion(form.value.partido_ids) }}</dd>
-              <dt class="text-muted fw-normal">Temas</dt>
-              <dd class="fw-semibold">{{ resumenSeleccion(form.value.tema_ids) }}</dd>
-              <dt class="text-muted fw-normal mb-0">Comisiones</dt>
-              <dd class="fw-semibold mb-0">{{ resumenSeleccion(form.value.comision_ids) }}</dd>
-            </dl>
-          </div>
+        <div class="reg-summary">
+          <h3>Lo capturado hasta ahora</h3>
+          <dl>
+            <div><dt>Número</dt><dd>{{ form.value.numero || 'Sin capturar' }}</dd></div>
+            <div><dt>Legislatura</dt><dd>{{ nombreCatalogo(legislaturas(), form.value.legislatura_id) || 'Sin seleccionar' }}</dd></div>
+            <div><dt>Promoventes</dt><dd>{{ resumenSeleccion('legislador_ids') }}</dd></div>
+            <div><dt>Grupos parlamentarios</dt><dd>{{ resumenSeleccion('partido_ids') }}</dd></div>
+            <div><dt>Temas</dt><dd>{{ resumenSeleccion('tema_ids') }}</dd></div>
+            <div><dt>Comisiones</dt><dd>{{ resumenSeleccion('comision_ids') }}</dd></div>
+          </dl>
         </div>
 
       </div>
@@ -73,7 +64,9 @@
     <!-- Formulario -->
     <div class="col-lg-9 order-1 order-lg-2">
 
-    <section class="block" id="seccion-ficha">
+    @if (pasoActual() === 1) {
+
+    <section class="block">
       <header class="block-head">
         <h2>Identificación</h2>
         <p>Datos oficiales con los que el expediente entra al sistema.</p>
@@ -92,7 +85,7 @@
           </div>
           <div class="field">
             <label>Legislatura <span class="required">*</span></label>
-            <ng-select [items]="legislaturas()" bindLabel="nombre" bindValue="id" formControlName="legislatura_id" placeholder="Seleccione..." [class.is-invalid]="invalido('legislatura_id')"></ng-select>
+            <ng-select [items]="legislaturas()" bindLabel="nombre" bindValue="id" formControlName="legislatura_id" placeholder="Seleccione..." appendTo="body" [class.is-invalid]="invalido('legislatura_id')"></ng-select>
             @if (invalido('legislatura_id')) { <div class="text-danger small mt-1">Indique la legislatura en la que se presentó la iniciativa.</div> }
           </div>
         </div>
@@ -216,7 +209,7 @@
         <div class="row-2">
           <div class="field">
             <label>Estatus <span class="required">*</span></label>
-            <ng-select [items]="estatus()" bindLabel="nombre" bindValue="id" formControlName="estatus_id" placeholder="Seleccione..." [class.is-invalid]="invalido('estatus_id')"></ng-select>
+            <ng-select [items]="estatus()" bindLabel="nombre" bindValue="id" formControlName="estatus_id" placeholder="Seleccione..." appendTo="body" [class.is-invalid]="invalido('estatus_id')"></ng-select>
             @if (invalido('estatus_id')) { <div class="text-danger small mt-1">Seleccione un estatus.</div> }
           </div>
           <div class="field">
@@ -248,7 +241,11 @@
       </div>
     </section>
 
-    <section class="block" id="seccion-analisis">
+    }
+
+    @if (pasoActual() === 2) {
+
+    <section class="block">
       <header class="block-head">
         <h2>Diagnóstico y propósito</h2>
         <p>Qué problema atiende la iniciativa y qué busca lograr.</p>
@@ -360,7 +357,11 @@
       </div>
     </section>
 
-    <section class="block" id="seccion-comparativas">
+    }
+
+    @if (pasoActual() === 3) {
+
+    <section class="block">
       <header class="block-head d-flex justify-content-between align-items-center">
         <div>
           <h2>Antecedentes comparados</h2>
@@ -397,15 +398,24 @@
       </div>
     </section>
 
-    <div class="d-flex justify-content-end gap-2 mb-5">
-      <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">Cancelar</button>
-      <button type="submit" class="btn btn-primary" [disabled]="guardando()">
-        @if (guardando()) {
-          <span class="spinner-border spinner-border-sm me-2"></span>Guardando...
+    }
+
+    <div class="d-flex justify-content-between gap-2 mb-5">
+      <button type="button" class="btn btn-outline-secondary" (click)="anteriorPaso()" [disabled]="pasoActual() === 1">← Anterior</button>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">Cancelar</button>
+        @if (pasoActual() < 3) {
+          <button type="button" class="btn btn-primary" (click)="siguientePaso()">Siguiente →</button>
         } @else {
-          {{ iniciativaId() ? 'Guardar cambios' : 'Registrar iniciativa' }}
+          <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+            @if (guardando()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>Guardando...
+            } @else {
+              {{ iniciativaId() ? 'Guardar cambios' : 'Registrar iniciativa' }}
+            }
+          </button>
         }
-      </button>
+      </div>
     </div>
 
     </div>

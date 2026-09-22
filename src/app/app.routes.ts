@@ -53,6 +53,11 @@ export const routes: Routes = [
     loadChildren: () => import('./components/ayuda/ayuda.route'),
   },
   {
+    // Sin authGuard a propósito: es el portal de consulta ciudadana.
+    path: 'consulta',
+    loadChildren: () => import('./components/publico/publico.route'),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

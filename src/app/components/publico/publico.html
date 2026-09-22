@@ -1,0 +1,256 @@
+<div class="public-portal">
+
+  <header class="public-header">
+    <nav class="public-nav">
+      <div class="public-brand">
+        <div class="brand-mark">IN</div>
+        <div>
+          <strong>Consulta de Iniciativas</strong>
+          <small>Instituto de Estudios Legislativos</small>
+        </div>
+      </div>
+      <div class="public-nav-actions">
+        <span class="public-mode-label">Acceso público</span>
+        <button class="btn btn-outline-light btn-sm" type="button" (click)="volverAlSistema()">Acceso administrativo</button>
+      </div>
+    </nav>
+  </header>
+
+  <section class="public-hero">
+    <div class="public-hero-inner">
+      <span class="public-eyebrow">Poder Legislativo del Estado de México</span>
+      <h1>Consulta pública de iniciativas legislativas</h1>
+      <p>Busque por título, número, tema, grupo parlamentario, persona legisladora, legislatura o comisión, y consulte la información pública de cada expediente.</p>
+
+      <form class="public-searchbar" (ngSubmit)="buscar()">
+        <span class="search-ico">⌕</span>
+        <input
+          [ngModel]="filtros().q"
+          (ngModelChange)="actualizarFiltro('q', $event)"
+          name="q"
+          placeholder="Ej. movilidad, transparencia, 1321, nombre de la persona legisladora…"
+          autocomplete="off">
+        <button class="btn btn-dorado" type="submit">Buscar</button>
+      </form>
+      @if (errorBusqueda()) {
+        <div class="public-search-error">Escriba al menos dos caracteres para realizar la búsqueda.</div>
+      }
+
+      @if (temasDestacados().length) {
+        <div class="hero-quick">
+          <span class="quick-label">Temas con más iniciativas:</span>
+          @for (t of temasDestacados(); track t[0]) {
+            <button class="quick-chip" type="button" [class.active]="filtros().tema === t[0]" (click)="alternarTema(t[0])">{{ t[0] }} · {{ t[1] }}</button>
+          }
+        </div>
+      }
+
+      <div class="hero-stats">
+        <div class="hero-stat"><strong>{{ total() }}</strong><span>Iniciativas disponibles</span></div>
+        <div class="hero-stat"><strong>{{ temasDisponibles().length }}</strong><span>Temas legislativos</span></div>
+        <div class="hero-stat"><strong>{{ ultimaActualizacion() ? (ultimaActualizacion() | date:'dd/MM/yyyy') : 'Sin información' }}</strong><span>Última actualización</span></div>
+      </div>
+    </div>
+  </section>
+
+  <main class="public-main">
+    <section class="public-toolbar">
+      <div class="toolbar-top">
+        <div>
+          <h2>Resultados</h2>
+          <p><strong>{{ resultados().length }}</strong> iniciativas coinciden · <span>{{ mostrados().length }}</span> en pantalla</p>
+        </div>
+        <div class="sort-field">
+          <label for="publicSort">Ordenar por</label>
+          <select class="control" id="publicSort" [ngModel]="orden()" (ngModelChange)="orden.set($event)">
+            <option value="recent">Más recientes</option>
+            <option value="old">Más antiguas</option>
+            <option value="number">Número, de mayor a menor</option>
+            <option value="title">Título, A–Z</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="public-filter-grid">
+        <div class="field">
+          <label>Grupo parlamentario / partido</label>
+          <select class="control" [ngModel]="filtros().partido" (ngModelChange)="actualizarFiltro('partido', $event)">
+            <option value="">Todos los grupos</option>
+            @for (v of partidosDisponibles(); track v) { <option [value]="v">{{ v }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Persona legisladora o promovente</label>
+          <select class="control" [ngModel]="filtros().legislador" (ngModelChange)="actualizarFiltro('legislador', $event)">
+            <option value="">Todas las personas</option>
+            @for (v of legisladoresDisponibles(); track v) { <option [value]="v">{{ v }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Legislatura</label>
+          <select class="control" [ngModel]="filtros().legislatura" (ngModelChange)="actualizarFiltro('legislatura', $event)">
+            <option value="">Todas las legislaturas</option>
+            @for (v of legislaturasDisponibles(); track v) { <option [value]="v">{{ v }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Comisión turnada</label>
+          <select class="control" [ngModel]="filtros().comision" (ngModelChange)="actualizarFiltro('comision', $event)">
+            <option value="">Todas las comisiones</option>
+            @for (v of comisionesDisponibles(); track v) { <option [value]="v">{{ v }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Tema</label>
+          <select class="control" [ngModel]="filtros().tema" (ngModelChange)="actualizarFiltro('tema', $event)">
+            <option value="">Todos los temas</option>
+            @for (v of temasDisponibles(); track v) { <option [value]="v">{{ v }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Estatus</label>
+          <select class="control" [ngModel]="filtros().estatus" (ngModelChange)="actualizarFiltro('estatus', $event)">
+            <option value="">Todos</option>
+            @for (v of estatusDisponibles(); track v) { <option [value]="v">{{ v }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>Año de presentación</label>
+          <select class="control" [ngModel]="filtros().anio" (ngModelChange)="actualizarFiltro('anio', $event)">
+            <option value="">Todos los años</option>
+            @for (v of aniosDisponibles(); track v) { <option [value]="v">{{ v }}</option> }
+          </select>
+        </div>
+      </div>
+
+      @if (filtrosActivos().length) {
+        <div class="active-filters">
+          <div class="active-filter-chips">
+            @for (f of filtrosActivos(); track f.etiqueta) {
+              <span class="filter-chip">{{ f.etiqueta }}: {{ f.valor }}<button type="button" (click)="f.limpiar()" aria-label="Quitar filtro">×</button></span>
+            }
+          </div>
+          <button class="btn btn-sm btn-outline-secondary" type="button" (click)="limpiarFiltros()">Limpiar todo</button>
+        </div>
+      }
+    </section>
+
+    @if (cargando()) {
+      <p class="text-muted text-center py-5">Cargando iniciativas...</p>
+    } @else {
+      <div class="public-grid">
+        @for (r of mostrados(); track r.id; let i = $index) {
+          <article class="public-card" [style.animation-delay.ms]="i * 35">
+            <div class="card-top">
+              <span class="card-number">Iniciativa {{ r.numero }}</span>
+              <span class="badge rounded-pill" [ngClass]="claseEstatus(r.estatus)">{{ r.estatus || 'Sin estatus' }}</span>
+            </div>
+            <h3>{{ r.titulo }}</h3>
+            <p>{{ r.resumen }}</p>
+            @if (r.temas.length) {
+              <div class="card-tags">
+                @for (t of r.temas.slice(0, 3); track t) { <span class="card-tag">{{ t }}</span> }
+              </div>
+            }
+            <div class="card-foot">
+              <div class="card-meta">
+                <b>{{ promoventeCorto(r) }}</b>
+                {{ r.fecha_presentacion | date:'dd/MM/yyyy' }} · {{ r.legislatura || 'Sin legislatura' }}
+              </div>
+              <button class="btn btn-primary btn-sm" type="button" (click)="abrirDetalle(r)">Ver ficha</button>
+            </div>
+          </article>
+        } @empty {
+          <div class="public-empty">
+            <strong>Ninguna iniciativa coincide con estos criterios.</strong><br>
+            <span class="tiny">Quite uno de los filtros activos o busque con otros términos.</span>
+          </div>
+        }
+      </div>
+
+      @if (restantes() > 0) {
+        <div class="load-more-wrap">
+          <button class="btn btn-outline-secondary" type="button" (click)="verMas()">
+            Ver {{ restantes() < 6 ? restantes() : 6 }} más de {{ restantes() }} restantes
+          </button>
+        </div>
+      }
+    }
+  </main>
+
+  <footer class="public-footer">
+    <div class="public-footer-inner">
+      <div>
+        <strong>Instituto de Estudios Legislativos</strong>
+        <small>Información pública para consulta ciudadana.</small>
+      </div>
+      <small>Los borradores y campos de análisis interno no se muestran en este portal.</small>
+    </div>
+  </footer>
+
+</div>
+
+@if (detalle(); as r) {
+  <div class="modal d-block" tabindex="-1" style="background:rgba(0,0,0,.55)" (click)="cerrarDetalle()">
+    <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <div class="modal-eyebrow">Iniciativa {{ r.numero }}</div>
+            <h2 class="modal-title h5 mb-2">{{ r.titulo }}</h2>
+            <div class="modal-meta">
+              <span class="meta-pill">Ficha pública</span>
+              <span class="meta-pill">{{ r.fecha_presentacion | date:'dd/MM/yyyy' }}</span>
+              <span class="meta-pill">{{ r.legislatura || 'Sin legislatura' }}</span>
+              <span class="badge rounded-pill" [ngClass]="claseEstatus(r.estatus)">{{ r.estatus || 'Sin estatus' }}</span>
+            </div>
+          </div>
+          <button type="button" class="btn-close" (click)="cerrarDetalle()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-info small">Esta ficha contiene exclusivamente información de consulta pública.</div>
+
+          <h3 class="detail-title">Quién la presenta</h3>
+          <dl class="detail-list">
+            <div class="detail-row"><dt>Personas promoventes</dt><dd>
+              @if (r.legisladores.length) { <div class="chips">@for (v of r.legisladores; track v) { <span class="chip">{{ v }}</span> }</div> } @else { <span class="text-muted">Sin información</span> }
+            </dd></div>
+            <div class="detail-row"><dt>Grupos parlamentarios</dt><dd>
+              @if (r.partidos.length) { <div class="chips">@for (v of r.partidos; track v) { <span class="chip">{{ v }}</span> }</div> } @else { <span class="text-muted">Sin información</span> }
+            </dd></div>
+          </dl>
+
+          <h3 class="detail-title">Materia y trámite</h3>
+          <dl class="detail-list">
+            <div class="detail-row"><dt>Temas</dt><dd>
+              @if (r.temas.length) { <div class="chips">@for (v of r.temas; track v) { <span class="chip">{{ v }}</span> }</div> } @else { <span class="text-muted">Sin información</span> }
+            </dd></div>
+            <div class="detail-row"><dt>Subtema</dt><dd>{{ r.subtema || 'Sin capturar' }}</dd></div>
+            <div class="detail-row"><dt>Comisiones turnadas</dt><dd>
+              @if (r.comisiones.length) { <div class="chips">@for (v of r.comisiones; track v) { <span class="chip">{{ v }}</span> }</div> } @else { <span class="text-muted">Sin información</span> }
+            </dd></div>
+          </dl>
+
+          <h3 class="detail-title">Contenido</h3>
+          <dl class="detail-list">
+            <div class="detail-row"><dt>Resumen</dt><dd>{{ r.resumen || 'Sin capturar' }}</dd></div>
+            <div class="detail-row"><dt>Problema público</dt><dd [class.text-muted]="!r.problema" [class.fst-italic]="!r.problema">{{ r.problema || 'Información en proceso de integración' }}</dd></div>
+            <div class="detail-row"><dt>Objetivo</dt><dd [class.text-muted]="!r.objetivo" [class.fst-italic]="!r.objetivo">{{ r.objetivo || 'Información en proceso de integración' }}</dd></div>
+            <div class="detail-row"><dt>Beneficios esperados</dt><dd [class.text-muted]="!r.beneficios" [class.fst-italic]="!r.beneficios">{{ r.beneficios || 'Información en proceso de integración' }}</dd></div>
+            <div class="detail-row"><dt>Palabras clave</dt><dd>
+              @if (r.palabras_clave) { <div class="chips">@for (v of r.palabras_clave.split(','); track v) { <span class="chip">{{ v.trim() }}</span> }</div> } @else { <span class="text-muted">Sin información</span> }
+            </dd></div>
+          </dl>
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          @if (r.enlace) {
+            <a class="btn btn-primary" [href]="r.enlace" target="_blank" rel="noopener">Consultar documento oficial</a>
+          } @else {
+            <span class="text-muted small">Sin documento oficial enlazado</span>
+          }
+          <button class="btn btn-outline-secondary" type="button" (click)="cerrarDetalle()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
