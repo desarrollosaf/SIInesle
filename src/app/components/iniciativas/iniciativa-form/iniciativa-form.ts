@@ -79,6 +79,7 @@ export class IniciativaForm implements OnInit {
   loading = signal(false);
   guardando = signal(false);
   iniciativaId = signal<number | null>(null);
+  pasoActual = signal<1 | 2 | 3>(1);
   private comparativasEliminadas: number[] = [];
 
   legisladores = signal<CatalogoItem[]>([]);
@@ -249,16 +250,40 @@ export class IniciativaForm implements OnInit {
     return `${this.camposCompletos(CAMPOS_ANALISIS_INTEGRAL)} de ${CAMPOS_ANALISIS_INTEGRAL.length}`;
   }
 
-  irASeccion(id: string): void {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  pasoCompleto(paso: 1 | 2): boolean {
+    const campos = paso === 1 ? CAMPOS_FICHA_TECNICA : CAMPOS_ANALISIS_INTEGRAL;
+    return this.camposCompletos(campos) === campos.length;
+  }
+
+  irAPaso(paso: 1 | 2 | 3): void {
+    this.pasoActual.set(paso);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  siguientePaso(): void {
+    const campos = this.pasoActual() === 1 ? CAMPOS_FICHA_TECNICA : CAMPOS_ANALISIS_INTEGRAL;
+    const invalidos = campos.filter((campo) => this.form.get(campo)?.invalid);
+
+    if (invalidos.length) {
+      invalidos.forEach((campo) => this.form.get(campo)?.markAsTouched());
+      Swal.fire('Complete la etapa', 'Revise los campos obligatorios marcados en rojo antes de continuar.', 'warning');
+      return;
+    }
+
+    this.irAPaso((this.pasoActual() + 1) as 1 | 2 | 3);
+  }
+
+  anteriorPaso(): void {
+    if (this.pasoActual() > 1) this.irAPaso((this.pasoActual() - 1) as 1 | 2 | 3);
   }
 
   nombreCatalogo(lista: CatalogoItem[], id: number | null): string {
     return lista.find((item) => item.id === id)?.nombre ?? '';
   }
 
-  resumenSeleccion(ids: number[] | null): string {
-    return ids?.length ? `${ids.length} seleccionado${ids.length > 1 ? 's' : ''}` : 'Ninguno';
+  resumenSeleccion(campo: CampoPicker): string {
+    const nombres = this.chipsDe(campo).map((item) => item.nombre);
+    return nombres.length ? nombres.join(', ') : 'Ninguno';
   }
 
   private catalogoDe(campo: CampoPicker): CatalogoItem[] {
@@ -338,8 +363,12 @@ export class IniciativaForm implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+    const invalidosFicha = CAMPOS_FICHA_TECNICA.filter((campo) => this.form.get(campo)?.invalid);
+    const invalidosAnalisis = CAMPOS_ANALISIS_INTEGRAL.filter((campo) => this.form.get(campo)?.invalid);
+
+    if (invalidosFicha.length || invalidosAnalisis.length) {
+      [...invalidosFicha, ...invalidosAnalisis].forEach((campo) => this.form.get(campo)?.markAsTouched());
+      this.irAPaso(invalidosFicha.length ? 1 : 2);
       Swal.fire('Formulario incompleto', 'Revise los campos obligatorios marcados en rojo.', 'warning');
       return;
     }

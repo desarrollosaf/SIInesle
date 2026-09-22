@@ -8,6 +8,7 @@ import { CatalogosModule } from './catalogos/catalogos.module';
 import { IniciativasModule } from './iniciativas/iniciativas.module';
 import { ComparativasModule } from './comparativas/comparativas.module';
 import { AuditoriaModule } from './auditoria/auditoria.module';
+import { PublicoModule } from './publico/publico.module';
 
 import { UsersSafs } from './models/users-safs.model';
 import { SUsuario } from './models/s-usuario.model';
@@ -59,6 +60,7 @@ import { SUsers } from './models/s-users.model';
     IniciativasModule,
     ComparativasModule,
     AuditoriaModule,
+    PublicoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
