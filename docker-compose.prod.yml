@@ -24,7 +24,7 @@ services:
         BASE_HREF: /iniciativas/
     container_name: siinesle-frontend
     ports:
-      - "8089:80"
+      - "8096:80"
     restart: always
     depends_on:
       - backend
@@ -35,7 +35,7 @@ services:
       dockerfile: Dockerfile
     container_name: siinesle-backend
     ports:
-      - "3033:3001"
+      - "3037:3001"
     env_file:
       - ./backend/.env
     volumes:
